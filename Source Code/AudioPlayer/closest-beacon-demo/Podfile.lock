@@ -1,0 +1,36 @@
+PODS:
+  - InflectorKit (0.0.1)
+  - Meteor (0.2.1):
+    - InflectorKit
+    - PocketSocket
+    - SimpleKeychain
+  - PocketSocket (1.0.1):
+    - PocketSocket/Client (= 1.0.1)
+    - PocketSocket/Core (= 1.0.1)
+    - PocketSocket/Server (= 1.0.1)
+  - PocketSocket/Client (1.0.1):
+    - PocketSocket/Core
+  - PocketSocket/Core (1.0.1)
+  - PocketSocket/Server (1.0.1):
+    - PocketSocket/Client
+  - SimpleKeychain (0.8.1)
+
+DEPENDENCIES:
+  - Meteor
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - InflectorKit
+    - Meteor
+    - PocketSocket
+    - SimpleKeychain
+
+SPEC CHECKSUMS:
+  InflectorKit: 64497199e6764f4d8337cab7f700a77b13d76a73
+  Meteor: c7158a73a5b4af79f75bff0e8c29fcd6a525e3f3
+  PocketSocket: 9c6867d66fb4f962af96b9b07f4b45bb561b2c2a
+  SimpleKeychain: e2485c28d82fcece35e9e41faeac42ebfe614815
+
+PODFILE CHECKSUM: 3a6f07d80f85652c05ee66b1a05d903ca120abcf
+
+COCOAPODS: 1.7.1
