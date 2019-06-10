@@ -1,13 +1,19 @@
+// WiFi Stuff ---------
+#include <WiFi.h>         
+#include <WebServer.h>    
+#include <AutoConnect.h>
+WebServer   Server;
+AutoConnect Portal(Server);
+
+
+
+// BLE Stuff ---------
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
-
-
-// BLE Stuff ---------
 #define PROXIMITY_LIMIT_RSSI -55
-
 int scanTime = 1; //In seconds
 BLEScan* pBLEScan;
 bool runningScan = false;
@@ -17,13 +23,16 @@ int numCloseDevices = 0;
 
 // Capacitive Touch Stuff ---------
 const int TOUCH_SENSOR_THRESHOLD = 20;
-
 int touchSensor1Value=0;
 int touchSensor2Value=0;
 int touchSensor3Value=0;
 boolean touch1Start = false;
 boolean touch2Start = false;
 boolean touch3Start = false;
+
+
+
+const int LED_PIN = 5; // Thing's onboard LED
 
 
 
@@ -42,17 +51,36 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 
 void setup() {
-   Serial.begin(115200);
-//   setupIBeacon();
-   setupBLE();
-   runBLEScan();
+  Serial.begin(115200);
+  pinMode(LED_PIN,OUTPUT);
+  connectWiFi();
+  setupBLE();
+  runBLEScan();
 }
 
 
 
 void loop() {
+  Portal.handleClient();
   readSensors();
   senseTouchEvents();
+}
+
+
+
+void rootPage() {
+  char content[] = "Hello, world";
+  Server.send(200, "text/plain", content);
+}
+
+
+
+void connectWiFi()
+{
+  Server.on("/", rootPage);
+  if (Portal.begin()) {
+    Serial.println("WiFi connected: " + WiFi.localIP().toString());
+  }
 }
 
 
