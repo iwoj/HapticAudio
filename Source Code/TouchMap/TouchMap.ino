@@ -184,39 +184,3 @@ void senseTouchEvents() {
   }
 }
 
-//
-//void setupIBeacon() {
-//  Serial.println("Starting BLE work!");
-//
-//  BLEDevice::init("Redwoods");
-//  BLEServer *pServer = BLEDevice::createServer();
-//  BLEService *pService = pServer->createService(SERVICE_UUID);
-//  BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-//                                         CHARACTERISTIC_UUID,
-//                                         BLECharacteristic::PROPERTY_READ |
-//                                         BLECharacteristic::PROPERTY_WRITE
-//                                       );
-//
-//  pCharacteristic->setValue("My characteristic value");
-//  pService->start();
-//  BLEAdvertising *pAdvertising = pServer->getAdvertising();
-//  
-//  Serial.println("Building up iBeacon advertising ..");
-//  BLEBeacon myBeacon;
-//  // Setting up according to https://os.mbed.com/blog/entry/BLE-Beacons-URIBeacon-AltBeacons-iBeacon/
-//  myBeacon.setManufacturerId(uint16_t (0x1AFF));
-//  myBeacon.setMajor(uint16_t (0x0001));
-//  myBeacon.setMinor(uint16_t (0x0001));
-////  myBeacon.setProximityUUID(uint16_t (0x004C));
-//  myBeacon.setProximityUUID(BLEUUID("00000000-0000-0000-0000-000000000001"));
-//  myBeacon.setSignalPower(0xC8);
-//  
-//  BLEAdvertisementData advertisementData;
-//  advertisementData.setFlags(ESP_BLE_ADV_FLAG_LIMIT_DISC | ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
-//  // Build the iBeacon data structure and store it in std::string beaconData
-//  advertisementData.setManufacturerData(myBeacon.getData());
-//  pAdvertising->setAdvertisementData(advertisementData);
-//  pAdvertising->start();
-//  
-//  Serial.println("Characteristic defined! Now you can read it in your phone!");
-//}
