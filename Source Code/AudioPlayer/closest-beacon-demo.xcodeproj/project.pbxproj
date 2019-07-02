@@ -13,7 +13,12 @@
 		11E8419B19E99A7F00D73840 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11E8419A19E99A7F00D73840 /* Images.xcassets */; };
 		11E8419E19E99A7F00D73840 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11E8419C19E99A7F00D73840 /* LaunchScreen.xib */; };
 		11E841AA19E99A7F00D73840 /* closest_beacon_demoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E841A919E99A7F00D73840 /* closest_beacon_demoTests.swift */; };
-		977FC66DBC80C93D6B19B014 /* Pods_closest_beacon_demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 540A8F60E10CD3001878EA66 /* Pods_closest_beacon_demo.framework */; };
+		3CDBD8D822B27F3A00CAFC56 /* walk-in-the-parks-intro.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D222B27F3A00CAFC56 /* walk-in-the-parks-intro.mp3 */; };
+		3CDBD8D922B27F3A00CAFC56 /* walk-in-the-parks.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D322B27F3A00CAFC56 /* walk-in-the-parks.mp3 */; };
+		3CDBD8DA22B27F3A00CAFC56 /* restoration-intro.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D422B27F3A00CAFC56 /* restoration-intro.mp3 */; };
+		3CDBD8DB22B27F3A00CAFC56 /* habitat.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D522B27F3A00CAFC56 /* habitat.mp3 */; };
+		3CDBD8DC22B27F3A00CAFC56 /* restoration.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D622B27F3A00CAFC56 /* restoration.mp3 */; };
+		3CDBD8DD22B27F3A00CAFC56 /* habitat-intro.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3CDBD8D722B27F3A00CAFC56 /* habitat-intro.mp3 */; };
 		BF6E469E228CC408005188A9 /* background.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BF6E469D228CC408005188A9 /* background.mp3 */; };
 		BF6E46A0228CC57B005188A9 /* platypus.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = BF6E469F228CC57B005188A9 /* platypus.mp3 */; };
 		BF74958D22A1DEF200D252E9 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = BF74958C22A1DEF200D252E9 /* Podfile */; };
@@ -35,7 +40,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0A2969E0E6E7C6F5E1AE53A2 /* Pods-closest-beacon-demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-closest-beacon-demo.release.xcconfig"; path = "Target Support Files/Pods-closest-beacon-demo/Pods-closest-beacon-demo.release.xcconfig"; sourceTree = "<group>"; };
 		11E8418E19E99A7F00D73840 /* closest-beacon-demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "closest-beacon-demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		11E8419219E99A7F00D73840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		11E8419319E99A7F00D73840 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -46,8 +50,12 @@
 		11E841A319E99A7F00D73840 /* closest-beacon-demoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "closest-beacon-demoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		11E841A819E99A7F00D73840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		11E841A919E99A7F00D73840 /* closest_beacon_demoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = closest_beacon_demoTests.swift; sourceTree = "<group>"; };
-		540A8F60E10CD3001878EA66 /* Pods_closest_beacon_demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_closest_beacon_demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		601ECF88B6E2A279D957CD2F /* Pods-closest-beacon-demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-closest-beacon-demo.debug.xcconfig"; path = "Target Support Files/Pods-closest-beacon-demo/Pods-closest-beacon-demo.debug.xcconfig"; sourceTree = "<group>"; };
+		3CDBD8D222B27F3A00CAFC56 /* walk-in-the-parks-intro.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "walk-in-the-parks-intro.mp3"; sourceTree = "<group>"; };
+		3CDBD8D322B27F3A00CAFC56 /* walk-in-the-parks.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "walk-in-the-parks.mp3"; sourceTree = "<group>"; };
+		3CDBD8D422B27F3A00CAFC56 /* restoration-intro.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "restoration-intro.mp3"; sourceTree = "<group>"; };
+		3CDBD8D522B27F3A00CAFC56 /* habitat.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = habitat.mp3; sourceTree = "<group>"; };
+		3CDBD8D622B27F3A00CAFC56 /* restoration.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = restoration.mp3; sourceTree = "<group>"; };
+		3CDBD8D722B27F3A00CAFC56 /* habitat-intro.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "habitat-intro.mp3"; sourceTree = "<group>"; };
 		BF6E469D228CC408005188A9 /* background.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = background.mp3; sourceTree = "<group>"; };
 		BF6E469F228CC57B005188A9 /* platypus.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = platypus.mp3; sourceTree = "<group>"; };
 		BF74958C22A1DEF200D252E9 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -65,7 +73,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BFAF0529228B7C6B00991331 /* AVFoundation.framework in Frameworks */,
-				977FC66DBC80C93D6B19B014 /* Pods_closest_beacon_demo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,7 +93,6 @@
 				11E841A619E99A7F00D73840 /* closest-beacon-demoTests */,
 				11E8418F19E99A7F00D73840 /* Products */,
 				BFAF0527228B7C6B00991331 /* Frameworks */,
-				3CD1614B4A912ABB4007BB8E /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -142,16 +148,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		3CD1614B4A912ABB4007BB8E /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				601ECF88B6E2A279D957CD2F /* Pods-closest-beacon-demo.debug.xcconfig */,
-				0A2969E0E6E7C6F5E1AE53A2 /* Pods-closest-beacon-demo.release.xcconfig */,
-			);
-			name = Pods;
-			path = "closest-beacon-demo/Pods";
-			sourceTree = "<group>";
-		};
 		BF757C8F229735FA00F5099D /* Images */ = {
 			isa = PBXGroup;
 			children = (
@@ -162,6 +158,12 @@
 		BFAF0526228B75AF00991331 /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
+				3CDBD8D722B27F3A00CAFC56 /* habitat-intro.mp3 */,
+				3CDBD8D522B27F3A00CAFC56 /* habitat.mp3 */,
+				3CDBD8D422B27F3A00CAFC56 /* restoration-intro.mp3 */,
+				3CDBD8D622B27F3A00CAFC56 /* restoration.mp3 */,
+				3CDBD8D222B27F3A00CAFC56 /* walk-in-the-parks-intro.mp3 */,
+				3CDBD8D322B27F3A00CAFC56 /* walk-in-the-parks.mp3 */,
 				BF6E469D228CC408005188A9 /* background.mp3 */,
 				BF6E469F228CC57B005188A9 /* platypus.mp3 */,
 				BFAF052B228B7FE200991331 /* tasmania.mp3 */,
@@ -175,7 +177,6 @@
 			isa = PBXGroup;
 			children = (
 				BFAF0528228B7C6B00991331 /* AVFoundation.framework */,
-				540A8F60E10CD3001878EA66 /* Pods_closest_beacon_demo.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -187,11 +188,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 11E841AD19E99A7F00D73840 /* Build configuration list for PBXNativeTarget "closest-beacon-demo" */;
 			buildPhases = (
-				3C218F285815BF5CBD7FE9C2 /* [CP] Check Pods Manifest.lock */,
 				11E8418A19E99A7F00D73840 /* Sources */,
 				11E8418B19E99A7F00D73840 /* Frameworks */,
 				11E8418C19E99A7F00D73840 /* Resources */,
-				0030ED475ECF8EE610965CC4 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -277,14 +276,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				11E8419919E99A7F00D73840 /* Main.storyboard in Resources */,
+				3CDBD8DC22B27F3A00CAFC56 /* restoration.mp3 in Resources */,
 				11E8419E19E99A7F00D73840 /* LaunchScreen.xib in Resources */,
 				BFAF052F228B7FE200991331 /* tasmanian-devil.mp3 in Resources */,
 				BFAF052D228B7FE200991331 /* wombat.mp3 in Resources */,
 				BF6E46A0228CC57B005188A9 /* platypus.mp3 in Resources */,
 				BFAF052E228B7FE200991331 /* tasmania.mp3 in Resources */,
 				BF74958D22A1DEF200D252E9 /* Podfile in Resources */,
+				3CDBD8DB22B27F3A00CAFC56 /* habitat.mp3 in Resources */,
 				BF6E469E228CC408005188A9 /* background.mp3 in Resources */,
+				3CDBD8D922B27F3A00CAFC56 /* walk-in-the-parks.mp3 in Resources */,
+				3CDBD8DD22B27F3A00CAFC56 /* habitat-intro.mp3 in Resources */,
 				11E8419B19E99A7F00D73840 /* Images.xcassets in Resources */,
+				3CDBD8DA22B27F3A00CAFC56 /* restoration-intro.mp3 in Resources */,
+				3CDBD8D822B27F3A00CAFC56 /* walk-in-the-parks-intro.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,55 +301,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		0030ED475ECF8EE610965CC4 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-closest-beacon-demo/Pods-closest-beacon-demo-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/InflectorKit/InflectorKit.framework",
-				"${BUILT_PRODUCTS_DIR}/Meteor/Meteor.framework",
-				"${BUILT_PRODUCTS_DIR}/PocketSocket/PocketSocket.framework",
-				"${BUILT_PRODUCTS_DIR}/SimpleKeychain/SimpleKeychain.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/InflectorKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Meteor.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PocketSocket.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SimpleKeychain.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-closest-beacon-demo/Pods-closest-beacon-demo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3C218F285815BF5CBD7FE9C2 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-closest-beacon-demo-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		11E8418A19E99A7F00D73840 /* Sources */ = {
@@ -475,7 +431,6 @@
 		};
 		11E841AE19E99A7F00D73840 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 601ECF88B6E2A279D957CD2F /* Pods-closest-beacon-demo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "closest-beacon-demo/closest-beacon-demo.entitlements";
@@ -495,7 +450,6 @@
 		};
 		11E841AF19E99A7F00D73840 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0A2969E0E6E7C6F5E1AE53A2 /* Pods-closest-beacon-demo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "closest-beacon-demo/closest-beacon-demo.entitlements";

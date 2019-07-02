@@ -1,9 +1,0 @@
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/InflectorKit" "${PODS_CONFIGURATION_BUILD_DIR}/Meteor" "${PODS_CONFIGURATION_BUILD_DIR}/PocketSocket" "${PODS_CONFIGURATION_BUILD_DIR}/SimpleKeychain"
-GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/InflectorKit/InflectorKit.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/Meteor/Meteor.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/PocketSocket/PocketSocket.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SimpleKeychain/SimpleKeychain.framework/Headers"
-LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
-OTHER_LDFLAGS = $(inherited) -l"system" -l"z" -framework "CFNetwork" -framework "CoreData" -framework "Foundation" -framework "InflectorKit" -framework "Meteor" -framework "PocketSocket" -framework "Security" -framework "SimpleKeychain"
-PODS_BUILD_DIR = ${BUILD_DIR}
-PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
-PODS_PODFILE_DIR_PATH = ${SRCROOT}/closest-beacon-demo
-PODS_ROOT = ${SRCROOT}/closest-beacon-demo/Pods

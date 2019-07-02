@@ -11,14 +11,14 @@ import UIKit
 import CoreLocation
 import AVFoundation
 import CoreNFC
-import Meteor
+//import Meteor
 
 class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayerDelegate, UITextViewDelegate, NFCNDEFReaderSessionDelegate {
     
     @IBOutlet weak var log:UITextView!
     @IBOutlet weak var modeSwitch:UISwitch!
     
-    let Meteor = METCoreDataDDPClient(serverURL: URL(string: "wss://meteor-ios-todos.meteor.com/websocket")!)
+//    let Meteor = METCoreDataDDPClient(serverURL: URL(string: "wss://meteor-ios-todos.meteor.com/websocket")!)
     
     let regionUUID = "00000000-0000-0000-0000-000000000001"
     let regionIdentifier = "Redwoods"
@@ -33,6 +33,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
     let noBeaconID = "00000000-0000-0000-0000-000000000000.0.0"
     var previousBeaconID:String
     
+    let DUAL_MODE = "dual"
     let PROXIMITY_MODE = "proximity"
     let NFC_MODE = "nfc"
     var currentMode:String
@@ -48,25 +49,46 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
         ],
         [
             "color": UIColor(red: 84/255, green: 77/255, blue: 160/255, alpha: 1),
-            "soundPath": Bundle.main.path(forResource: "platypus", ofType: "mp3")!,
+            "soundPath": Bundle.main.path(forResource: "habitat", ofType: "mp3")!,
             "beaconID": ["00000000-0000-0000-0000-000000000001", 1, 1],
+            "rangeLimit": -55,
+            "nfcID": ""
+        ],
+        [
+            "color": UIColor(red: 84/255, green: 77/255, blue: 160/255, alpha: 1),
+            "soundPath": Bundle.main.path(forResource: "habitat-intro", ofType: "mp3")!,
+            "beaconID": ["", 0, 0],
             "rangeLimit": -58,
             "nfcID": "04:48:A9:7A:B0:57:81"
         ],
         [
             "color": UIColor(red: 220/255, green: 120/255, blue: 120/255, alpha: 1),
-            "soundPath": Bundle.main.path(forResource: "wombat", ofType: "mp3")!,
+            "soundPath": Bundle.main.path(forResource: "walk-in-the-parks", ofType: "mp3")!,
             "beaconID": ["00000000-0000-0000-0000-000000000001", 1, 2],
+            "rangeLimit": -58,
+            "nfcID": ""
+        ],
+        [
+            "color": UIColor(red: 220/255, green: 120/255, blue: 120/255, alpha: 1),
+            "soundPath": Bundle.main.path(forResource: "walk-in-the-parks-intro", ofType: "mp3")!,
+            "beaconID": ["", 0, 0],
             "rangeLimit": -55,
             "nfcID": "04:39:A9:7A:B0:57:81"
         ],
         [
             "color": UIColor(red: 64/255, green: 220/255, blue: 32/255, alpha: 1),
-            "soundPath": Bundle.main.path(forResource: "tasmanian-devil", ofType: "mp3")!,
+            "soundPath": Bundle.main.path(forResource: "restoration", ofType: "mp3")!,
             "beaconID": ["00000000-0000-0000-0000-000000000001", 1, 3],
+            "rangeLimit": -60,
+            "nfcID": ""
+        ],
+        [
+            "color": UIColor(red: 64/255, green: 220/255, blue: 32/255, alpha: 1),
+            "soundPath": Bundle.main.path(forResource: "restoration-intro", ofType: "mp3")!,
+            "beaconID": ["", 0, 0],
             "rangeLimit": -63,
             "nfcID": "04:3E:A9:7A:B0:57:81"
-        ]
+        ],
     ]
     
     required init?(coder aDecoder: NSCoder) {
@@ -90,7 +112,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
         
         log.delegate = self
         
-        Meteor.connect()
+//        Meteor.connect()
         
         setMode(NFC_MODE)
         
@@ -99,8 +121,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
             locationManager.requestWhenInUseAuthorization()
         }
         
-        configureAudioSessionCategory()
-        configureAudioSessionToEarSpeaker()
+//        configureAudioSessionCategory()
+//        configureAudioSessionToSpeaker()
         
         initExhibits(settings: exhibitSettings)
         
@@ -128,6 +150,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
             nfcSession?.begin()
             currentMode = mode
             modeSwitch.setOn(true, animated: true)
+        case DUAL_MODE:
+            locationManager.startRangingBeacons(in: region)
+            nfcSession = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
+            nfcSession?.begin()
+            currentMode = mode
         default:
             print("Invalid mode.")
         }
@@ -250,7 +277,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, AVAudioPlayer
             // Process detected NFCNDEFMessage objects.
             self.log.text = ""
             self.log.text += "\(nfcID ?? "")\n"
+//            if (currentMode == DUAL_MODE) {
+//                locationManager.stopRangingBeacons(in: region)
+//            }
             self.playExhibitAudio(nfcID ?? self.noBeaconID)
+//            if (currentMode == DUAL_MODE) {
+//                locationManager.startRangingBeacons(in: region)
+//            }
         }
     }
     

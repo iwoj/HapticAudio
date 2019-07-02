@@ -12,12 +12,14 @@ AutoConnect Portal(Server);
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
+#include <LinkedList.h>
 
 #define PROXIMITY_LIMIT_RSSI -55
 int scanTime = 1; //In seconds
 BLEScan* pBLEScan;
 bool runningScan = false;
-int numCloseDevices = 0;
+LinkedList<BLEAdvertisedDevice> closeDevices;
+LinkedList<BLEAdvertisedDevice> previousCloseDevices;
 
 
 
@@ -40,9 +42,9 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) {
       if (advertisedDevice.haveRSSI()){
         if ((int)advertisedDevice.getRSSI() > PROXIMITY_LIMIT_RSSI) {
-          Serial.printf("Advertised Device: %s", advertisedDevice.toString().c_str());
-          Serial.printf(", Rssi: %d \n", (int)advertisedDevice.getRSSI());
-          numCloseDevices++;
+//          Serial.printf("Advertised Device: %s", advertisedDevice.toString().c_str());
+//          Serial.printf(", Rssi: %d \n", (int)advertisedDevice.getRSSI());
+          closeDevices.add(advertisedDevice);
         }
       }
     }
@@ -96,7 +98,10 @@ void setupBLE() {
 
 void runBLEScan() {
   Serial.println("Scanning BLE...");
-  numCloseDevices = 0;
+//  clearDevices(previousCloseDevices);
+  previousCloseDevices = closeDevices;
+//  clearDevices(closeDevices);
+  closeDevices = LinkedList<BLEAdvertisedDevice>();
   runningScan = true;
   pBLEScan->start(scanTime, scanComplete);
 }
@@ -105,6 +110,7 @@ void runBLEScan() {
 
 void scanComplete(BLEScanResults foundDevices) {  
   runningScan = false;
+  closeDevices.sort(sortDevices);
   handleBLEProximity();
   pBLEScan->clearResults();
   Serial.println("");
@@ -113,16 +119,78 @@ void scanComplete(BLEScanResults foundDevices) {
 
 
 
+LinkedList<BLEAdvertisedDevice> listDiff(LinkedList<BLEAdvertisedDevice> a, LinkedList<BLEAdvertisedDevice> b) {
+  LinkedList<BLEAdvertisedDevice> combined;
+  LinkedList<int> toRemove;
+  for (int i = 0; i < a.size(); i++) {
+    combined.add(a.get(i));
+  }
+  for (int i = 0; i < b.size(); i++) {
+    combined.add(b.get(i));
+  }
+  combined.sort(sortDevices);
+//  for (int i = 0; i < combined.size(); i++) {
+//    if (i >= combined.size() - 1 && 
+//        combined.get(i).getAddress().toString() == combined.get(i+1).getAddress().toString()) {
+//      toRemove.add(i);
+//      toRemove.add(i+1);
+//    }
+//  }
+//  toRemove.sort(sortIntReverse);
+//  for (int i = 0; i < toRemove.size(); i++) {
+//    combined.remove(toRemove.get(i));
+//  }
+  return combined;
+}
+
+
+
+LinkedList<BLEAdvertisedDevice> listNotIn(LinkedList<BLEAdvertisedDevice> a, LinkedList<BLEAdvertisedDevice> b) {
+  LinkedList<BLEAdvertisedDevice> diffList = listDiff(a, b);
+  return listDiff(diffList, a);
+}
+
+
+
+
+
+void printDeviceList(LinkedList<BLEAdvertisedDevice> a) {
+  for (int i = 0; i < a.size() - 1; i++) {
+    Serial.print(a.get(i).getAddress().toString().c_str());
+    Serial.print(", ");
+  }
+  Serial.print(a.get(a.size() - 1).getAddress().toString().c_str());
+}
+
+
+
+
 void handleBLEProximity() {
   if (!runningScan) {
-    if (numCloseDevices > 0) {
-      Serial.println(numCloseDevices + (String)" device(s) close by!");
+    if (closeDevices.size() > 0) {
+      Serial.println(closeDevices.size() + (String)" device(s) close by!");
       // Do stuff.
     }
-    else if (numCloseDevices == 0) {
+    else if (closeDevices.size() == 0) {
       Serial.println("No devices close by.");
       // Do stuff.
     }
+//    LinkedList<BLEAdvertisedDevice> ld = listDiff(closeDevices, previousCloseDevices);
+//    printDeviceList(ld);
+//    ld.clear();
+    printDeviceList(listDiff(closeDevices, previousCloseDevices));
+    Serial.print("\n");
+    
+    // Send insert/remove commands to Meteor
+//    LinkedList<BLEAdvertisedDevice> newDevices = listNotIn(closeDevices, previousCloseDevices);
+//    Serial.print("New devices: ");
+//    printDeviceList(newDevices);
+//    Serial.print("\n");
+    
+//    LinkedList<BLEAdvertisedDevice> removedDevices = listNotIn(previousCloseDevices, closeDevices);
+//    Serial.print("Removed devices: ");
+//    printDeviceList(removedDevices);
+//    Serial.print("\n");
   }
 }
 
@@ -183,4 +251,18 @@ void senseTouchEvents() {
     touch3Start = false;
   }
 }
+
+
+
+int sortDevices(BLEAdvertisedDevice &a, BLEAdvertisedDevice &b) {
+  return strcmp(a.getAddress().toString().c_str(), 
+                b.getAddress().toString().c_str());
+}
+
+
+
+int sortIntReverse(int &a, int &b) {
+  return a < b ? 1 : -1;
+}
+
 
