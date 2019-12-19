@@ -2,7 +2,7 @@
 // Must upload with No OTA (Large APP) partition scheme
 
 // General stuff
-#include <ArduinoSort.h>
+// #include <ArduinoSort.h>
 
 
 
@@ -12,7 +12,9 @@
 #include <AutoConnect.h>
 WebServer   Server;
 AutoConnect Portal(Server);
-
+WiFiClient client;
+#define touchMapServer        "designcards.mooo.com"
+#define touchMapServerPort    80
 
 
 // BLE Stuff ---------
@@ -30,6 +32,15 @@ byte deviceCounter = 0;
 BLEAdvertisedDevice closeDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice previousCloseDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice nullDevice = BLEAdvertisedDevice();
+
+
+
+// Meteor Stuff ---------
+// https://github.com/flyandi/meteor-arduino-ddp
+// - TODO: get this to compile.
+// #include <DDP.h>
+// - Doesn't work. Just use REST to POST bluetooth device readings.
+
 
 
 // Capacitive Touch Stuff ---------
@@ -84,6 +95,14 @@ void loop() {
   Portal.handleClient();
   readSensors();
   senseTouchEvents();
+  
+  // if there's incoming data from the net connection.
+  // send it out the serial port. This is for debugging
+  // purposes only:
+  if (client.available()) {
+    char c = client.read();
+    Serial.write(c);
+  }
 }
 
 
@@ -232,23 +251,33 @@ void handleBLEProximity() {
     Serial.println(deviceCount(closeDevices) + (String)" device(s) close by.");
     Serial.printf("Closest device: %s\n", closeDevices[0].getAddress().toString().c_str());
     
+    if (DEBUG) Serial.print("closeDevices: ");
+    if (DEBUG) printDeviceList(closeDevices, MAX_CLOSE_DEVICES);
+    if (DEBUG) Serial.print("\n");
+    if (DEBUG) Serial.print("previousCloseDevices: ");
+    if (DEBUG) printDeviceList(previousCloseDevices, MAX_CLOSE_DEVICES);
+    if (DEBUG) Serial.print("\n");
+    
     BLEAdvertisedDevice *newDevices = arrSubtract(closeDevices, previousCloseDevices);
     Serial.print("Number of new devices: ");
     Serial.println(deviceCount(newDevices));
     if (DEBUG) Serial.print("New devices: ");
     if (DEBUG) printDeviceList(newDevices, MAX_CLOSE_DEVICES);
     if (DEBUG) Serial.print("\n");
+
     
-    // Send insert/remove commands to Meteor
-    //    LinkedList<BLEAdvertisedDevice> newDevices = listNotIn(closeDevices, previousCloseDevices);
-    //    Serial.print("New devices: ");
-    //    printDeviceList(newDevices);
-    //    Serial.print("\n");
+    BLEAdvertisedDevice *lostDevices = arrSubtract(previousCloseDevices, closeDevices);
+    Serial.print("Number of devices lost: ");
+    Serial.println(deviceCount(lostDevices));
+    if (DEBUG) Serial.print("Lost devices: ");
+    if (DEBUG) printDeviceList(lostDevices, MAX_CLOSE_DEVICES);
+    if (DEBUG) Serial.print("\n");
     
-    //    LinkedList<BLEAdvertisedDevice> removedDevices = listNotIn(previousCloseDevices, closeDevices);
-    //    Serial.print("Removed devices: ");
-    //    printDeviceList(removedDevices);
-    //    Serial.print("\n");
+    // TODO:
+    // - Send insert/remove commands to Meteor
+    // - Use https://github.com/flyandi/meteor-arduino-ddp
+    // - Probably not https://github.com/andrea689/arduino-ciao-meteor-ddp-connector
+    postData();
   }
 }
 
@@ -256,18 +285,18 @@ void handleBLEProximity() {
 
 void readSensors() {
   byte numberOfReadings = 10;
-
+  
   touchSensor1Value = 0;
   touchSensor2Value = 0;
   touchSensor3Value = 0;
-
+  
   for (byte i = 0; i < numberOfReadings; i++)
   {
     touchSensor1Value += touchRead(T0);
     touchSensor2Value += touchRead(T2);
     touchSensor3Value += touchRead(T3);
   }
-
+  
   touchSensor1Value = touchSensor1Value / numberOfReadings;
   touchSensor2Value = touchSensor2Value / numberOfReadings;
   touchSensor3Value = touchSensor3Value / numberOfReadings;
@@ -286,7 +315,6 @@ void senseTouchEvents() {
     Serial.println("Touch1 end");
     touch1Start = false;
   }
-
   if (touchSensor2Value < TOUCH_SENSOR_THRESHOLD && !touch2Start) {
     Serial.print("Touch2 start (");
     Serial.print(touchSensor2Value);
@@ -395,5 +423,46 @@ byte deviceCount(BLEAdvertisedDevice devices[]) {
 void bleadCopy(BLEAdvertisedDevice arrayOriginal[], BLEAdvertisedDevice arrayCopy[], byte arraySize){ //Copy function
   for(byte i=0; i<arraySize; i++){
     arrayCopy[i]=arrayOriginal[i];  
+  }
+}
+
+// this method makes a HTTP connection to the server and sends the signals measured:
+bool postData() {
+  if (DEBUG) Serial.println("postData");
+  // close any connection before send a new request.
+  // This will free the socket on the WiFi shield
+  client.stop();
+  
+  // if there's a successful connection:
+  if (client.connect(touchMapServer, touchMapServerPort) > 0) {
+    Serial.println("connecting...");
+    // send the HTTP PUT request:
+  
+    // Build HTTP request.
+//    for (int i=0; i<NUM_SIGNALS; i++){
+//      String toSend = "POST /api/events HTTP/1.1\r\n";
+//      toSend += "Host:";
+//      toSend += ISDestURL;
+//      toSend += "\r\n" ;
+//      toSend += "Content-Type: application/json\r\n";
+//      toSend += "User-Agent: Arduino\r\n";
+//      toSend += "Accept-Version: ~0\r\n";
+//      toSend += "X-IS-AccessKey: " accessKey "\r\n";
+//      toSend += "X-IS-BucketKey: " bucketKey "\r\n";
+//  
+//      String payload = "[{\"key\": \"" + signalName[i] + "\", ";
+//      payload +="\"value\": \"" + signalData[i] + "\"}]\r\n";
+//  
+//      toSend += "Content-Length: "+String(payload.length())+"\r\n";
+//      toSend += "\r\n";
+//      toSend += payload;
+//      Serial.println(toSend);
+//      client.println(toSend);
+//    }
+    return true;
+  } else {
+    // if you couldn't make a connection:
+    Serial.println("connection failed");
+    return false;
   }
 }
