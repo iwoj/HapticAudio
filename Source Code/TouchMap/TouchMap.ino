@@ -14,7 +14,7 @@ WebServer   Server;
 AutoConnect Portal(Server);
 WiFiClient client;
 #define touchMapServer        "designcards.mooo.com"
-#define touchMapServerPort    80
+#define touchMapServerPort    3000
 
 
 // BLE Stuff ---------
@@ -25,7 +25,7 @@ WiFiClient client;
 
 #define PROXIMITY_LIMIT_RSSI  -55
 #define MAX_CLOSE_DEVICES     10
-byte scanTime = 1; //In seconds
+byte scanTime = 4; //In seconds
 BLEScan* pBLEScan;
 bool runningScan = false;
 byte deviceCounter = 0;
@@ -101,7 +101,7 @@ void loop() {
   // purposes only:
   if (client.available()) {
     char c = client.read();
-    Serial.write(c);
+    if (DEBUG) Serial.write(c);
   }
 }
 
@@ -436,29 +436,35 @@ bool postData() {
   // if there's a successful connection:
   if (client.connect(touchMapServer, touchMapServerPort) > 0) {
     Serial.println("connecting...");
-    // send the HTTP PUT request:
-  
+    // send the HTTP POST request:
+    byte numDevices = deviceCount(closeDevices);
+    
     // Build HTTP request.
-//    for (int i=0; i<NUM_SIGNALS; i++){
-//      String toSend = "POST /api/events HTTP/1.1\r\n";
-//      toSend += "Host:";
-//      toSend += ISDestURL;
-//      toSend += "\r\n" ;
-//      toSend += "Content-Type: application/json\r\n";
-//      toSend += "User-Agent: Arduino\r\n";
-//      toSend += "Accept-Version: ~0\r\n";
-//      toSend += "X-IS-AccessKey: " accessKey "\r\n";
-//      toSend += "X-IS-BucketKey: " bucketKey "\r\n";
-//  
-//      String payload = "[{\"key\": \"" + signalName[i] + "\", ";
-//      payload +="\"value\": \"" + signalData[i] + "\"}]\r\n";
-//  
-//      toSend += "Content-Length: "+String(payload.length())+"\r\n";
-//      toSend += "\r\n";
-//      toSend += payload;
-//      Serial.println(toSend);
-//      client.println(toSend);
-//    }
+    String toSend = "POST /methods/exhibitdevices.addSample HTTP/1.1\r\n";
+    toSend += "Host:";
+    toSend += touchMapServer;
+    toSend += "\r\n" ;
+    toSend += "Content-Type: application/json\r\n";
+    toSend += "User-Agent: Arduino\r\n";
+    toSend += "Accept-Version: ~0\r\n";
+
+    String payload = "[{\"exhibitID\": \"testExhibit1\", ";
+    payload += "\"devices\":[";
+    
+    for (byte i = 0; i < numDevices; i++){
+      payload += "{\"deviceID\": \"" + String(closeDevices[i].getAddress().toString().c_str()) + "\",";
+      payload +="\"signalStrength\": " + String(closeDevices[i].getRSSI()) + "}";
+      if (i < numDevices - 1)
+        payload += ",";
+    }
+    
+    payload += "]}]";
+    
+    toSend += "Content-Length: "+String(payload.length())+"\r\n";
+    toSend += "\r\n";
+    toSend += payload;
+    if (DEBUG) Serial.println(toSend);
+    client.println(toSend);
     return true;
   } else {
     // if you couldn't make a connection:
