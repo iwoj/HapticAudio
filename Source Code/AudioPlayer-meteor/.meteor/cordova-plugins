@@ -1,1 +1,4 @@
 cordova-plugin-bluetoothle@4.5.6
+cordova-plugin-device@2.0.3
+cordova-plugin-splashscreen@5.0.3
+cordova-plugin-statusbar@2.4.3

@@ -23,25 +23,18 @@ WiFiClient client;
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
-#define PROXIMITY_LIMIT_RSSI  -55
+// TODO:
+// - Load these variables continuously from server.
+// - figure out how to quicken the scan time without crashing
+#define PROXIMITY_LIMIT_RSSI  -60
 #define MAX_CLOSE_DEVICES     10
-byte scanTime = 4; //In seconds
+byte scanTime = 3; //In seconds
 BLEScan* pBLEScan;
 bool runningScan = false;
 byte deviceCounter = 0;
 BLEAdvertisedDevice closeDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice previousCloseDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice nullDevice = BLEAdvertisedDevice();
-
-
-
-// Meteor Stuff ---------
-// https://github.com/flyandi/meteor-arduino-ddp
-// - TODO: get this to compile.
-// #include <DDP.h>
-// - Doesn't work. Just use REST to POST bluetooth device readings.
-
-
 
 // Capacitive Touch Stuff ---------
 const int TOUCH_SENSOR_THRESHOLD = 20;
@@ -452,7 +445,12 @@ bool postData() {
     payload += "\"devices\":[";
     
     for (byte i = 0; i < numDevices; i++){
-      payload += "{\"deviceID\": \"" + String(closeDevices[i].getAddress().toString().c_str()) + "\",";
+      payload += "{\"address\": \"" + String(closeDevices[i].getAddress().toString().c_str()) + "\",";
+//      payload += "\"serviceDataUUID\": \"" + String(closeDevices[i].getServiceDataUUID().toString().c_str()) + "\",";
+//      payload += "\"serviceUUID\": \"" + String(closeDevices[i].getServiceUUID().toString().c_str()) + "\",";
+//      payload += "\"name\": \"" + String(closeDevices[i].getName().c_str()) + "\",";
+      payload += "\"string\": \"" + String(closeDevices[i].toString().c_str()) + "\",";
+//      payload += "\"manufacturerData\": \"" + String(closeDevices[i].getManufacturerData().c_str()) + "\",";
       payload +="\"signalStrength\": " + String(closeDevices[i].getRSSI()) + "}";
       if (i < numDevices - 1)
         payload += ",";

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import ExhibitDevices from '../api/exhibitdevices.js';
+import TouchEvents from '../api/touchevents.js';
 
 class App extends Component {
   constructor(props) {
@@ -15,10 +16,9 @@ class App extends Component {
 
   renderDevices() {
     let devices = this.props.devices;
-    console.log(devices);
     return devices.map((device, index) => {
       return (
-        <li key={device.deviceID} className={index == 0 ? "first" : ""}>{device.deviceID} {device.signalStrength}</li>
+        <li key={device.address} className={index == 0 ? "closestDevice" : ""}>{device.address} {device.signalStrength}</li>
       );
     });
   }
