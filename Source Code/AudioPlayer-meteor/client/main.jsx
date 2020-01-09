@@ -8,7 +8,7 @@ Meteor.startup(() => {
     console.log("Device UUID: " + device.uuid);
     setupDeviceAsBeacon();
   }
-  StatusBar.overlaysWebView(true);
+  if (typeof StatusBar !== 'undefined') StatusBar.overlaysWebView(true);
   render(<App />, document.getElementById('react-target'));
 });
 
