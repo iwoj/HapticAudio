@@ -1,0 +1,9 @@
+#!/bin/bash
+
+START_DIR="$PWD"
+METEOR_DIR="$PWD/AudioPlayer-meteor"
+BUILD_DIR="$PWD/AudioPlayer-meteor-build"
+mkdir -p "$BUILD_DIR"
+cd "$METEOR_DIR"
+meteor build "$BUILD_DIR" --server=designcards.mooo.com:3000
+cd "$START_DIR"

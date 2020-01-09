@@ -18,7 +18,7 @@ class App extends Component {
     let devices = this.props.devices;
     return devices.map((device, index) => {
       return (
-        <li key={device.address} className={index == 0 ? "closestDevice" : ""}>{device.address} {device.signalStrength}</li>
+        <li key={device.address} className={index == 0 ? "closestDevice" : ""}>{device.uuid} {device.signalStrength}</li>
       );
     });
   }

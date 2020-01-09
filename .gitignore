@@ -1,4 +1,5 @@
 Icon
 .DS_Store
 AudioPlayer-meteor-build
+*.swp
 

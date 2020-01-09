@@ -31,7 +31,7 @@ Meteor.methods({
     ExhibitDevices.insert({
         exhibitID: payload.exhibitID,
         timestamp: new Date(),
-        devices: payload.devices
+        devices: extractUUID(payload.devices)
       });
 
     ExhibitDevices.remove({
@@ -40,3 +40,12 @@ Meteor.methods({
   }
 });
 
+function extractUUID(devices) {
+  for (var i = 0; i < devices.length; i++) {
+    let match;
+    if (match = devices[i].string.match(/manufacturer data: (\w+?)\b/)) {
+      match[1].length > 32 ? devices[i].uuid = match[1].substring(8,40) : devices[i].uuid = match[1];
+    }
+  }
+  return devices;
+}
