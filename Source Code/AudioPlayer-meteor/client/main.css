@@ -2,6 +2,7 @@ body {
   padding: 0px;
   margin: 0px;
   font-family: sans-serif;
+  background-color: #bbbbbb;
 }
 
 .closestDevice {
@@ -9,7 +10,7 @@ body {
 }
 
 .iAmClosest {
-  background-color: red;
+  background-color: #88ccff;
 }
 
 .container {
