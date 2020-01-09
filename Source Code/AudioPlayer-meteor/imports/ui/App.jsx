@@ -42,11 +42,15 @@ class App extends Component {
       return false;
   }
 
+  whichTouchDown() {
+    if (this.props.touchEvent && this.props.touchEvent.buttonState == "down")
+      return this.props.touchEvent.buttonID;
+  }
+  
   render() {
     let className = "container";
     this.isClosest() ? className += " iAmClosest" : "";
-    if (this.props.touchEvent)
-      this.props.touchEvent.buttonState == "down" ? className += " buttonDown" : "";
+    this.whichTouchDown() ? className += " button" + this.whichTouchDown() + "Down" : "";
     return (
       <div className={className}>
         <header>

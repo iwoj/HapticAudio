@@ -13,8 +13,16 @@ body {
   background-color: #88ccff;
 }
 
-.iAmClosest.buttonDown {
+.iAmClosest.button1Down {
   background-color: red;
+}
+
+.iAmClosest.button2Down {
+  background-color: #44ff44;
+}
+
+.iAmClosest.button3Down {
+  background-color: #4488ff;
 }
 
 .container {

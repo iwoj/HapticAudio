@@ -452,7 +452,8 @@ void bleadCopy(BLEAdvertisedDevice arrayOriginal[], BLEAdvertisedDevice arrayCop
   }
 }
 
-// this method makes a HTTP connection to the server and sends the signals measured:
+// TODO:
+// - Use a connection queue with high priority
 bool postJSONData(String route, String payload) {
   if (DEBUG) Serial.println("postJSONData");
   // close any connection before send a new request.
@@ -489,7 +490,8 @@ bool postJSONData(String route, String payload) {
   }
 }
 
-// this method makes a HTTP connection to the server and sends the signals measured:
+// TODO:
+// - Use a connection queue with low priority
 bool postBLEScanData() {
   if (DEBUG) Serial.println("postBLEScanData");
   // close any connection before send a new request.
