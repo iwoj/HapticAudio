@@ -43,8 +43,12 @@ class App extends Component {
   }
 
   render() {
+    let className = "container";
+    this.isClosest() ? className += " iAmClosest" : "";
+    if (this.props.touchEvent)
+      this.props.touchEvent.buttonState == "down" ? className += " buttonDown" : "";
     return (
-      <div className={this.isClosest() ? "container iAmClosest" : "container"}>
+      <div className={className}>
         <header>
           <h1>{this.props.deviceCount} Nearby Device{this.props.deviceCount == 1 ? "" : "s"}</h1>
         </header>
@@ -58,10 +62,12 @@ class App extends Component {
 
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
+  Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48');
 
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
     deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,
+    touchEvent: TouchEvents.findOne(),
   };
 })(App);
 

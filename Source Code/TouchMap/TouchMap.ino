@@ -306,7 +306,7 @@ void senseTouchEvents() {
     Serial.print(touchSensor1Value);
     Serial.println(")");
     touch1Start = true;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -315,7 +315,7 @@ void senseTouchEvents() {
   else if (touchSensor1Value > TOUCH_SENSOR_THRESHOLD && touch1Start) {
     Serial.println("Touch1 end");
     touch1Start = false;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
@@ -326,7 +326,7 @@ void senseTouchEvents() {
     Serial.print(touchSensor2Value);
     Serial.println(")");
     touch2Start = true;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -335,7 +335,7 @@ void senseTouchEvents() {
   else if (touchSensor2Value > TOUCH_SENSOR_THRESHOLD && touch2Start) {
     Serial.println("Touch2 end");
     touch2Start = false;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
@@ -347,7 +347,7 @@ void senseTouchEvents() {
     Serial.print(touchSensor3Value);
     Serial.println(")");
     touch3Start = true;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -356,7 +356,7 @@ void senseTouchEvents() {
   else if (touchSensor3Value > TOUCH_SENSOR_THRESHOLD && touch3Start) {
     Serial.println("Touch3 end");
     touch3Start = false;
-    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";

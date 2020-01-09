@@ -7,6 +7,7 @@ Meteor.startup(() => {
   if (Meteor.isCordova) {
     console.log("Device UUID: " + device.uuid);
     setupDeviceAsBeacon();
+    window.plugins.insomnia.keepAwake();
   }
   if (typeof StatusBar !== 'undefined') StatusBar.overlaysWebView(true);
   render(<App />, document.getElementById('react-target'));

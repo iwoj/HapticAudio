@@ -9,13 +9,13 @@ if (Meteor.isServer) {
     return TouchEvents.find({});
   });
   Meteor.publish('exhibittouchevents', function (id) {
-    return TouchEvents.find({exhibitID:id});
+    return TouchEvents.find({exhibitMACAddress:id});
   }, {
     url: "publications/exhibittouchevents/:0",
     httpMethod: "get"
   });
   Meteor.publish('latesttouchevent', function (id) {
-    return TouchEvents.find({exhibitID:id},{sort:{timestamp:-1},limit: 1});
+    return TouchEvents.find({exhibitMACAddress:id},{sort:{timestamp:-1},limit: 1});
   }, {
     url: "publications/latesttouchevent/:0",
     httpMethod: "get"
@@ -25,12 +25,12 @@ if (Meteor.isServer) {
 Meteor.methods({
   'touchevents.addEvent'(payload) {
     check(payload, Object);
-    check(payload.exhibitID, String);
+    check(payload.exhibitMACAddress, String);
     check(payload.buttonState, String);
     check(payload.buttonID, Number);
 
     TouchEvents.insert({
-        exhibitID: payload.exhibitID,
+        exhibitMACAddress: payload.exhibitMACAddress,
         timestamp: new Date(),
         buttonState: payload.buttonState,
         buttonID: payload.buttonID,
