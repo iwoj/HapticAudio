@@ -16,16 +16,35 @@ class App extends Component {
 
   renderDevices() {
     let devices = this.props.devices;
-    return devices.map((device, index) => {
+    return devices.map((currentDevice, index) => {
       return (
-        <li key={device.address} className={index == 0 ? "closestDevice" : ""}>{device.uuid} {device.signalStrength}</li>
+        <li key={currentDevice.address} className={index == 0 ? "closestDevice" : ""}>{currentDevice.uuid} {currentDevice.signalStrength}</li>
       );
     });
+  }
+  
+  isClosest() {
+    let devices = this.props.devices;
+    let closest = false;
+    devices.forEach((currentDevice, index) => {
+      if (index == 0 && Meteor.isCordova && this.uuidMatch(device.uuid, currentDevice.uuid)) {
+        closest = true;
+      }
+    });
+    return closest;
+  }
+
+  uuidMatch(uuid1, uuid2) {
+    if (!uuid1 || !uuid2) return;
+    if (uuid1.replace(/-/g,"").toLowerCase() == uuid2.replace(/-/g,"").toLowerCase())
+      return true;
+    else 
+      return false;
   }
 
   render() {
     return (
-      <div className="container">
+      <div className={this.isClosest() ? "container iAmClosest" : "container"}>
         <header>
           <h1>{this.props.deviceCount} Nearby Device{this.props.deviceCount == 1 ? "" : "s"}</h1>
         </header>

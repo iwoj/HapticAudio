@@ -451,6 +451,7 @@ bool postData() {
 //      payload += "\"name\": \"" + String(closeDevices[i].getName().c_str()) + "\",";
       payload += "\"string\": \"" + String(closeDevices[i].toString().c_str()) + "\",";
 //      payload += "\"manufacturerData\": \"" + String(closeDevices[i].getManufacturerData().c_str()) + "\",";
+      // See: https://forum.arduino.cc/index.php?topic=626200.0
       payload +="\"signalStrength\": " + String(closeDevices[i].getRSSI()) + "}";
       if (i < numDevices - 1)
         payload += ",";

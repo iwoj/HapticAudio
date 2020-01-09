@@ -8,12 +8,12 @@ Meteor.startup(() => {
     console.log("Device UUID: " + device.uuid);
     setupDeviceAsBeacon();
   }
+  StatusBar.overlaysWebView(true);
   render(<App />, document.getElementById('react-target'));
 });
 
 function setupDeviceAsBeacon() {
   var uuid = device.uuid;
-  // var uuid = '00000000-0000-0000-0000-000000000000';
   var identifier = 'advertisedBeacon';
   var minor = 2000;
   var major = 5;
