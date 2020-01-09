@@ -25,9 +25,11 @@ WiFiClient client;
 
 // TODO:
 // - Load these variables continuously from server.
-// - figure out how to quicken the scan time without crashing
 #define PROXIMITY_LIMIT_RSSI  -60
 #define MAX_CLOSE_DEVICES     10
+char myMACAddress[25];
+// TODO: 
+// - figure out how to quicken the scan time without crashing
 byte scanTime = 3; //In seconds
 BLEScan* pBLEScan;
 bool runningScan = false;
@@ -76,6 +78,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT);
   connectWiFi();
+  registerExhibit();
   setupBLE();
   clearDevices(previousCloseDevices);
   clearDevices(closeDevices);
@@ -270,7 +273,7 @@ void handleBLEProximity() {
     // - Send insert/remove commands to Meteor
     // - Use https://github.com/flyandi/meteor-arduino-ddp
     // - Probably not https://github.com/andrea689/arduino-ciao-meteor-ddp-connector
-    postData();
+    postBLEScanData();
   }
 }
 
@@ -303,20 +306,40 @@ void senseTouchEvents() {
     Serial.print(touchSensor1Value);
     Serial.println(")");
     touch1Start = true;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 1, ";
+    payload += "\"buttonState\": \"down\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
   else if (touchSensor1Value > TOUCH_SENSOR_THRESHOLD && touch1Start) {
     Serial.println("Touch1 end");
     touch1Start = false;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 1, ";
+    payload += "\"buttonState\": \"up\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
   if (touchSensor2Value < TOUCH_SENSOR_THRESHOLD && !touch2Start) {
     Serial.print("Touch2 start (");
     Serial.print(touchSensor2Value);
     Serial.println(")");
     touch2Start = true;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 2, ";
+    payload += "\"buttonState\": \"down\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
   else if (touchSensor2Value > TOUCH_SENSOR_THRESHOLD && touch2Start) {
     Serial.println("Touch2 end");
     touch2Start = false;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 2, ";
+    payload += "\"buttonState\": \"up\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
 
   if (touchSensor3Value < TOUCH_SENSOR_THRESHOLD && !touch3Start) {
@@ -324,10 +347,20 @@ void senseTouchEvents() {
     Serial.print(touchSensor3Value);
     Serial.println(")");
     touch3Start = true;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 3, ";
+    payload += "\"buttonState\": \"down\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
   else if (touchSensor3Value > TOUCH_SENSOR_THRESHOLD && touch3Start) {
     Serial.println("Touch3 end");
     touch3Start = false;
+    String payload = "[{\"exhibitID\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"buttonID\": 3, ";
+    payload += "\"buttonState\": \"up\"";
+    payload += "}]";
+    postJSONData("/methods/touchevents.addEvent", payload);
   }
 }
 
@@ -420,15 +453,52 @@ void bleadCopy(BLEAdvertisedDevice arrayOriginal[], BLEAdvertisedDevice arrayCop
 }
 
 // this method makes a HTTP connection to the server and sends the signals measured:
-bool postData() {
-  if (DEBUG) Serial.println("postData");
+bool postJSONData(String route, String payload) {
+  if (DEBUG) Serial.println("postJSONData");
   // close any connection before send a new request.
   // This will free the socket on the WiFi shield
   client.stop();
   
   // if there's a successful connection:
   if (client.connect(touchMapServer, touchMapServerPort) > 0) {
-    Serial.println("connecting...");
+    Serial.print("Connected... ");
+    // send the HTTP POST request:
+    byte numDevices = deviceCount(closeDevices);
+    
+    // Build HTTP request.
+    String toSend = "POST ";
+    toSend += route;
+    toSend += " HTTP/1.1\r\n";
+    toSend += "Host:";
+    toSend += touchMapServer;
+    toSend += "\r\n" ;
+    toSend += "Content-Type: application/json\r\n";
+    toSend += "User-Agent: Arduino\r\n";
+    toSend += "Accept-Version: ~0\r\n";
+    toSend += "Content-Length: "+String(payload.length())+"\r\n";
+    toSend += "\r\n";
+    toSend += payload;
+    if (DEBUG) Serial.println(toSend);
+    client.println(toSend);
+    Serial.println("sent.");
+    return true;
+  } else {
+    // if you couldn't make a connection:
+    Serial.println("connection failed");
+    return false;
+  }
+}
+
+// this method makes a HTTP connection to the server and sends the signals measured:
+bool postBLEScanData() {
+  if (DEBUG) Serial.println("postBLEScanData");
+  // close any connection before send a new request.
+  // This will free the socket on the WiFi shield
+  client.stop();
+  
+  // if there's a successful connection:
+  if (client.connect(touchMapServer, touchMapServerPort) > 0) {
+    Serial.print("Connected... ");
     // send the HTTP POST request:
     byte numDevices = deviceCount(closeDevices);
     
@@ -441,7 +511,7 @@ bool postData() {
     toSend += "User-Agent: Arduino\r\n";
     toSend += "Accept-Version: ~0\r\n";
 
-    String payload = "[{\"exhibitID\": \"testExhibit1\", ";
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"devices\":[";
     
     for (byte i = 0; i < numDevices; i++){
@@ -464,10 +534,20 @@ bool postData() {
     toSend += payload;
     if (DEBUG) Serial.println(toSend);
     client.println(toSend);
+    Serial.println("sent.");
     return true;
   } else {
     // if you couldn't make a connection:
     Serial.println("connection failed");
     return false;
   }
+}
+
+void registerExhibit() {
+  uint8_t address[6];
+  esp_efuse_mac_get_default(address);
+  Serial.println("");
+  Serial.printf("My MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", address[0], address[1], address[2], address[3], address[4], address[5]);
+  sprintf(myMACAddress, "%02x:%02x:%02x:%02x:%02x:%02x", address[0], address[1], address[2], address[3], address[4], address[5]);
+  postJSONData("/methods/registerexhibit", "[{\"macAddress\": \"" + String(myMACAddress) +"\"}]");
 }

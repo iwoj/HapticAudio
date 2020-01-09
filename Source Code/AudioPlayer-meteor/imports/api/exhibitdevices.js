@@ -15,7 +15,7 @@ if (Meteor.isServer) {
     httpMethod: "get"
   });
   Meteor.publish('latestexhibitdevices', function (id) {
-    return ExhibitDevices.find({exhibitID:id},{sort:{timestamp:-1},limit: 1});
+    return ExhibitDevices.find({exhibitMACAddress:id},{sort:{timestamp:-1},limit: 1});
   }, {
     url: "publications/latestexhibitdevices/:0",
     httpMethod: "get"
@@ -25,11 +25,11 @@ if (Meteor.isServer) {
 Meteor.methods({
   'exhibitdevices.addSample'(payload) {
     check(payload, Object);
-    check(payload.exhibitID, String);
+    check(payload.exhibitMACAddress, String);
     check(payload.devices, Array);
 
     ExhibitDevices.insert({
-        exhibitID: payload.exhibitID,
+        exhibitMACAddress: payload.exhibitMACAddress,
         timestamp: new Date(),
         devices: extractUUID(payload.devices)
       });

@@ -18,7 +18,7 @@ class App extends Component {
     let devices = this.props.devices;
     return devices.map((currentDevice, index) => {
       return (
-        <li key={currentDevice.address} className={index == 0 ? "closestDevice" : ""}>{currentDevice.uuid} {currentDevice.signalStrength}</li>
+        <li key={currentDevice.address} className={index == 0 ? "closestDevice" : ""}>{currentDevice.uuid ? currentDevice.uuid : currentDevice.address} {currentDevice.signalStrength}</li>
       );
     });
   }
@@ -57,7 +57,7 @@ class App extends Component {
 }
 
 export default withTracker(() => {
-  Meteor.subscribe('latestexhibitdevices', 'testExhibit1');
+  Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
 
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
