@@ -1,3 +1,0 @@
-#!/bin/bash
-
-meteor --mobile-server http://designcards.mooo.com:3000

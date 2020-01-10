@@ -2,4 +2,4 @@ Icon
 .DS_Store
 AudioPlayer-meteor-build
 *.swp
-
+run-haptic-audio

@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import Links from '/imports/api/links';
 import TouchEvents from '/imports/api/touchevents';
 import ExhibitDevices from '/imports/api/exhibitdevices';
 import Exhibits from '/imports/api/exhibits';

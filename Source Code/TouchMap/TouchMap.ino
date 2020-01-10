@@ -29,8 +29,9 @@ WiFiClient client;
 #define MAX_CLOSE_DEVICES     10
 char myMACAddress[25];
 // TODO: 
-// - figure out how to quicken the scan time without crashing
-byte scanTime = 3; //In seconds
+// - figure out how to quicken the scan time without crashing. 3 seems to be the max.
+// - use a queue?
+byte scanTime = 5; // In seconds.
 BLEScan* pBLEScan;
 bool runningScan = false;
 byte deviceCounter = 0;
@@ -39,7 +40,7 @@ BLEAdvertisedDevice previousCloseDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice nullDevice = BLEAdvertisedDevice();
 
 // Capacitive Touch Stuff ---------
-const int TOUCH_SENSOR_THRESHOLD = 20;
+const int TOUCH_SENSOR_THRESHOLD = 80;
 int touchSensor1Value = 0;
 int touchSensor2Value = 0;
 int touchSensor3Value = 0;
