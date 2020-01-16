@@ -1,10 +1,6 @@
 // =========================
 // Must upload with No OTA (Large APP) partition scheme
 
-// General stuff
-// #include <ArduinoSort.h>
-
-
 
 // WiFi Stuff ---------
 #include <WiFi.h>
@@ -92,6 +88,11 @@ void loop() {
   Portal.handleClient();
   readSensors();
   senseTouchEvents();
+
+  // TODO:
+  // - Handle connection queue
+  //   - If there's something in the queue, deal with it in priority order
+  //   - One connection per loop?
   
   // if there's incoming data from the net connection.
   // send it out the serial port. This is for debugging
@@ -245,6 +246,7 @@ void handleBLEProximity() {
     }
     
     sortDevices(closeDevices, deviceSortByRSSI, MAX_CLOSE_DEVICES);
+    
     Serial.println(deviceCount(closeDevices) + (String)" device(s) close by.");
     Serial.printf("Closest device: %s\n", closeDevices[0].getAddress().toString().c_str());
     
@@ -270,10 +272,6 @@ void handleBLEProximity() {
     if (DEBUG) printDeviceList(lostDevices, MAX_CLOSE_DEVICES);
     if (DEBUG) Serial.print("\n");
     
-    // TODO:
-    // - Send insert/remove commands to Meteor
-    // - Use https://github.com/flyandi/meteor-arduino-ddp
-    // - Probably not https://github.com/andrea689/arduino-ciao-meteor-ddp-connector
     postBLEScanData();
   }
 }
@@ -302,12 +300,14 @@ void readSensors() {
 
 
 void senseTouchEvents() {
+  sortDevices(closeDevices, deviceSortByRSSI, MAX_CLOSE_DEVICES);
   if (touchSensor1Value < TOUCH_SENSOR_THRESHOLD && !touch1Start) {
     Serial.print("Touch1 start (");
     Serial.print(touchSensor1Value);
     Serial.println(")");
     touch1Start = true;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -317,6 +317,7 @@ void senseTouchEvents() {
     Serial.println("Touch1 end");
     touch1Start = false;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
@@ -328,6 +329,7 @@ void senseTouchEvents() {
     Serial.println(")");
     touch2Start = true;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -337,6 +339,7 @@ void senseTouchEvents() {
     Serial.println("Touch2 end");
     touch2Start = false;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
@@ -349,6 +352,7 @@ void senseTouchEvents() {
     Serial.println(")");
     touch3Start = true;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
@@ -358,6 +362,7 @@ void senseTouchEvents() {
     Serial.println("Touch3 end");
     touch3Start = false;
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
@@ -465,7 +470,6 @@ bool postJSONData(String route, String payload) {
   if (client.connect(touchMapServer, touchMapServerPort) > 0) {
     Serial.print("Connected... ");
     // send the HTTP POST request:
-    byte numDevices = deviceCount(closeDevices);
     
     // Build HTTP request.
     String toSend = "POST ";

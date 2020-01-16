@@ -13,6 +13,14 @@ class App extends Component {
       hideCompleted: false,
     };
   }
+  
+
+  // componentDidMount() {
+  //   AccountsAnonymous.login(() => {
+  //     Meteor.call("globalsettings.registerUser", {uuid: device.uuid, `});
+  //   });
+  // }
+  
 
   renderDevices() {
     let devices = this.props.devices;
@@ -66,8 +74,8 @@ class App extends Component {
 
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
-  Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48');
-
+  Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null);
+  
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
     deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,

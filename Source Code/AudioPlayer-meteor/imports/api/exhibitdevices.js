@@ -49,3 +49,5 @@ function extractUUID(devices) {
   }
   return devices;
 }
+
+
