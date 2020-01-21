@@ -24,10 +24,11 @@ WiFiClient client;
 #define PROXIMITY_LIMIT_RSSI  -60
 #define MAX_CLOSE_DEVICES     10
 char myMACAddress[25];
+
 // TODO: 
 // - figure out how to quicken the scan time without crashing. 3 seems to be the max.
 // - use a queue?
-byte scanTime = 5; // In seconds.
+byte scanTime = 1; // In seconds.
 BLEScan* pBLEScan;
 bool runningScan = false;
 byte deviceCounter = 0;
@@ -44,6 +45,12 @@ boolean touch1Start = false;
 boolean touch2Start = false;
 boolean touch3Start = false;
 
+#include <Queue.h>
+struct jsonPost {
+  String route;
+  String payload;
+};
+DataQueue<jsonPost> jsonConnectionQueue(10);
 
 
 const byte LED_PIN = 5; // Thing's onboard LED
@@ -88,11 +95,6 @@ void loop() {
   Portal.handleClient();
   readSensors();
   senseTouchEvents();
-
-  // TODO:
-  // - Handle connection queue
-  //   - If there's something in the queue, deal with it in priority order
-  //   - One connection per loop?
   
   // if there's incoming data from the net connection.
   // send it out the serial port. This is for debugging
@@ -101,9 +103,25 @@ void loop() {
     char c = client.read();
     if (DEBUG) Serial.write(c);
   }
+  
+  handleConnectionQueue();
 }
 
 
+
+void handleConnectionQueue() {
+  // Handle connection queue
+  while(jsonConnectionQueue.item_count() > 0) {
+    Serial.print("Connection queue item count: ");
+    Serial.println(jsonConnectionQueue.item_count());
+    if (!client.connected()) { // Block on connections and handle each one in sequence.
+      jsonPost postThis = jsonConnectionQueue.dequeue();
+      postJSONData(postThis.route, postThis.payload);
+      client.flush();
+      client.stop();
+    }
+  }
+}
 
 void rootPage() {
   char content[] = "Hello, world";
@@ -272,7 +290,25 @@ void handleBLEProximity() {
     if (DEBUG) printDeviceList(lostDevices, MAX_CLOSE_DEVICES);
     if (DEBUG) Serial.print("\n");
     
-    postBLEScanData();
+    byte numDevices = deviceCount(closeDevices);
+    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
+    payload += "\"devices\":[";
+    for (byte i = 0; i < numDevices; i++){
+      payload += "{\"address\": \"" + String(closeDevices[i].getAddress().toString().c_str()) + "\",";
+//      payload += "\"serviceDataUUID\": \"" + String(closeDevices[i].getServiceDataUUID().toString().c_str()) + "\",";
+//      payload += "\"serviceUUID\": \"" + String(closeDevices[i].getServiceUUID().toString().c_str()) + "\",";
+//      payload += "\"name\": \"" + String(closeDevices[i].getName().c_str()) + "\",";
+      payload += "\"string\": \"" + String(closeDevices[i].toString().c_str()) + "\",";
+//      payload += "\"manufacturerData\": \"" + String(closeDevices[i].getManufacturerData().c_str()) + "\",";
+      // See: https://forum.arduino.cc/index.php?topic=626200.0
+      payload +="\"signalStrength\": " + String(closeDevices[i].getRSSI()) + "}";
+      if (i < numDevices - 1)
+        payload += ",";
+    }
+    payload += "]}]";
+    
+    
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/exhibitdevices.addSample", payload});
   }
 }
 
@@ -311,7 +347,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
   else if (touchSensor1Value > TOUCH_SENSOR_THRESHOLD && touch1Start) {
     Serial.println("Touch1 end");
@@ -321,7 +357,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
   if (touchSensor2Value < TOUCH_SENSOR_THRESHOLD && !touch2Start) {
     Serial.print("Touch2 start (");
@@ -333,7 +369,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
   else if (touchSensor2Value > TOUCH_SENSOR_THRESHOLD && touch2Start) {
     Serial.println("Touch2 end");
@@ -343,7 +379,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
 
   if (touchSensor3Value < TOUCH_SENSOR_THRESHOLD && !touch3Start) {
@@ -356,7 +392,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"down\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
   else if (touchSensor3Value > TOUCH_SENSOR_THRESHOLD && touch3Start) {
     Serial.println("Touch3 end");
@@ -366,7 +402,7 @@ void senseTouchEvents() {
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"up\"";
     payload += "}]";
-    postJSONData("/methods/touchevents.addEvent", payload);
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
 }
 
@@ -458,8 +494,6 @@ void bleadCopy(BLEAdvertisedDevice arrayOriginal[], BLEAdvertisedDevice arrayCop
   }
 }
 
-// TODO:
-// - Use a connection queue with high priority
 bool postJSONData(String route, String payload) {
   if (DEBUG) Serial.println("postJSONData");
   // close any connection before send a new request.
@@ -495,60 +529,6 @@ bool postJSONData(String route, String payload) {
   }
 }
 
-// TODO:
-// - Use a connection queue with low priority
-bool postBLEScanData() {
-  if (DEBUG) Serial.println("postBLEScanData");
-  // close any connection before send a new request.
-  // This will free the socket on the WiFi shield
-  // client.stop();
-  
-  // if there's a successful connection:
-  if (client.connect(touchMapServer, touchMapServerPort) > 0) {
-    Serial.print("Connected... ");
-    // send the HTTP POST request:
-    byte numDevices = deviceCount(closeDevices);
-    
-    // Build HTTP request.
-    String toSend = "POST /methods/exhibitdevices.addSample HTTP/1.1\r\n";
-    toSend += "Host:";
-    toSend += touchMapServer;
-    toSend += "\r\n" ;
-    toSend += "Content-Type: application/json\r\n";
-    toSend += "User-Agent: Arduino\r\n";
-    toSend += "Accept-Version: ~0\r\n";
-
-    String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
-    payload += "\"devices\":[";
-    
-    for (byte i = 0; i < numDevices; i++){
-      payload += "{\"address\": \"" + String(closeDevices[i].getAddress().toString().c_str()) + "\",";
-//      payload += "\"serviceDataUUID\": \"" + String(closeDevices[i].getServiceDataUUID().toString().c_str()) + "\",";
-//      payload += "\"serviceUUID\": \"" + String(closeDevices[i].getServiceUUID().toString().c_str()) + "\",";
-//      payload += "\"name\": \"" + String(closeDevices[i].getName().c_str()) + "\",";
-      payload += "\"string\": \"" + String(closeDevices[i].toString().c_str()) + "\",";
-//      payload += "\"manufacturerData\": \"" + String(closeDevices[i].getManufacturerData().c_str()) + "\",";
-      // See: https://forum.arduino.cc/index.php?topic=626200.0
-      payload +="\"signalStrength\": " + String(closeDevices[i].getRSSI()) + "}";
-      if (i < numDevices - 1)
-        payload += ",";
-    }
-    
-    payload += "]}]";
-    
-    toSend += "Content-Length: "+String(payload.length())+"\r\n";
-    toSend += "\r\n";
-    toSend += payload;
-    if (DEBUG) Serial.println(toSend);
-    client.println(toSend);
-    Serial.println("sent.");
-    return true;
-  } else {
-    // if you couldn't make a connection:
-    Serial.println("connection failed");
-    return false;
-  }
-}
 
 void registerExhibit() {
   uint8_t address[6];
@@ -556,5 +536,5 @@ void registerExhibit() {
   Serial.println("");
   Serial.printf("My MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", address[0], address[1], address[2], address[3], address[4], address[5]);
   sprintf(myMACAddress, "%02x:%02x:%02x:%02x:%02x:%02x", address[0], address[1], address[2], address[3], address[4], address[5]);
-  postJSONData("/methods/registerexhibit", "[{\"macAddress\": \"" + String(myMACAddress) +"\"}]");
+  jsonConnectionQueue.enqueue((jsonPost){"/methods/registerexhibit", "[{\"macAddress\": \"" + String(myMACAddress) +"\"}]"});
 }
