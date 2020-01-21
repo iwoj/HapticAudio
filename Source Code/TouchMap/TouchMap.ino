@@ -464,7 +464,7 @@ bool postJSONData(String route, String payload) {
   if (DEBUG) Serial.println("postJSONData");
   // close any connection before send a new request.
   // This will free the socket on the WiFi shield
-  client.stop();
+  // client.stop();
   
   // if there's a successful connection:
   if (client.connect(touchMapServer, touchMapServerPort) > 0) {
@@ -501,7 +501,7 @@ bool postBLEScanData() {
   if (DEBUG) Serial.println("postBLEScanData");
   // close any connection before send a new request.
   // This will free the socket on the WiFi shield
-  client.stop();
+  // client.stop();
   
   // if there's a successful connection:
   if (client.connect(touchMapServer, touchMapServerPort) > 0) {
