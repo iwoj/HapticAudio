@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import ExhibitDevices from '../api/exhibitdevices.js';
-import TouchEvents from '../api/touchevents.js';
+import Exhibits from '../api/exhibits.js';
+// import TouchEvents from '../api/touchevents.js';
 
 class App extends Component {
   constructor(props) {
@@ -31,6 +32,25 @@ class App extends Component {
     });
   }
   
+  renderDevices() {
+    let devices = this.props.devices;
+    return devices.map((currentDevice, index) => {
+      return (
+        <li key={currentDevice.address} className={index == 0 ? "closestDevice" : ""}>{currentDevice.uuid ? currentDevice.uuid : currentDevice.address} {currentDevice.signalStrength}</li>
+      );
+    });
+  }
+  
+  renderButtons() {
+    let exhibit = this.props.exhibit;
+    if (!(exhibit && exhibit.buttons)) return "";
+    return exhibit.buttons.map((currentButton, index) => {
+      return (
+        <li key={currentButton.id}>{currentButton.id} ({currentButton.sequence}): {currentButton.state}</li>
+      );
+    });
+  }
+  
   isClosest() {
     let devices = this.props.devices;
     let closest = false;
@@ -50,15 +70,32 @@ class App extends Component {
       return false;
   }
 
-  whichTouchDown() {
-    if (this.props.touchEvent && this.props.touchEvent.buttonState == "down")
-      return this.props.touchEvent.buttonID;
+  // whichTouchDown() {
+  //   if (this.props.touchEvent && this.props.touchEvent.buttonState == "down")
+  //     return this.props.touchEvent.buttonID;
+  // }
+  
+  isButtonDown(id) {
+    let buttonDown = false;
+    if (this.props.exhibit && this.props.exhibit.buttons) {
+      for (let i = 0; i < this.props.exhibit.buttons.length; i++) {
+        if (this.props.exhibit.buttons[i].id == id && this.props.exhibit.buttons[i].state == "down")
+          buttonDown = true;
+      }
+      return buttonDown;
+    }
+    else {
+      return false;
+    }
   }
   
   render() {
     let className = "container";
     this.isClosest() ? className += " iAmClosest" : "";
-    this.whichTouchDown() ? className += " button" + this.whichTouchDown() + "Down" : "";
+    // this.whichTouchDown() ? className += " button" + this.whichTouchDown() + "Down" : "";
+    this.isButtonDown("1") ? className += " button1Down" : "";
+    this.isButtonDown("2") ? className += " button2Down" : "";
+    this.isButtonDown("3") ? className += " button3Down" : "";
     return (
       <div className={className}>
         <header>
@@ -67,6 +104,9 @@ class App extends Component {
         <ul>
           {this.renderDevices()}
         </ul>
+        <ul>
+          {this.renderButtons()}
+        </ul>
       </div>
     );
   }
@@ -74,12 +114,14 @@ class App extends Component {
 
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
-  Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null);
+  Meteor.subscribe('exhibit', '30:ae:a4:58:42:48');
+  // Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null);
   
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
     deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,
-    touchEvent: TouchEvents.findOne(),
+    exhibit: Exhibits.findOne(),
+    // touchEvent: TouchEvents.findOne(),
   };
 })(App);
 

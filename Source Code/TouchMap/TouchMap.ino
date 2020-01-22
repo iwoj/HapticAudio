@@ -9,6 +9,10 @@
 WebServer   Server;
 AutoConnect Portal(Server);
 WiFiClient client;
+
+// TODO:
+// It would be nice if this could be autodiscovered on the local network
+// instead of hardcoded.
 #define touchMapServer        "designcards.mooo.com"
 #define touchMapServerPort    3000
 
@@ -44,6 +48,8 @@ int touchSensor3Value = 0;
 boolean touch1Start = false;
 boolean touch2Start = false;
 boolean touch3Start = false;
+unsigned long sequence = 1;
+#define UNSIGNED_LONG_MAX 4294967295
 
 #include <Queue.h>
 struct jsonPost {
@@ -57,7 +63,7 @@ const byte LED_PIN = 5; // Thing's onboard LED
 
 
 
-#define DEBUG     false
+#define DEBUG     true
 
 
 
@@ -99,10 +105,12 @@ void loop() {
   // if there's incoming data from the net connection.
   // send it out the serial port. This is for debugging
   // purposes only:
-  if (client.available()) {
-    char c = client.read();
-    if (DEBUG) Serial.write(c);
-  }
+//  while(client.available()) {
+//    String line = client.readStringUntil('\r');
+//    Serial.print(line);
+//  }
+//  
+//  client.stop();
   
   handleConnectionQueue();
 }
@@ -117,7 +125,11 @@ void handleConnectionQueue() {
     if (!client.connected()) { // Block on connections and handle each one in sequence.
       jsonPost postThis = jsonConnectionQueue.dequeue();
       postJSONData(postThis.route, postThis.payload);
-      client.flush();
+      while (client.available()) {
+        char c = client.read();
+        Serial.write(c);
+      }
+//      client.flush();
       client.stop();
     }
   }
@@ -177,7 +189,6 @@ void scanComplete(BLEScanResults foundDevices) {
 
 
 BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[]) {
-  if (DEBUG) Serial.println("Got to arrSubtract");
   BLEAdvertisedDevice combined[MAX_CLOSE_DEVICES*2];
   BLEAdvertisedDevice duplicates[MAX_CLOSE_DEVICES];
   byte duplicatesIndex = 0;
@@ -187,9 +198,6 @@ BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[
   clearDevices(duplicates);
   clearDevices(differences);
   
-  if (DEBUG) Serial.println("b:");
-  if (DEBUG) printDeviceList(b, MAX_CLOSE_DEVICES);
-  
   // Combine a + b
   for (byte i = 0; i < MAX_CLOSE_DEVICES; i++) {
     combined[i] = a[i];
@@ -197,7 +205,6 @@ BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[
   for (byte i = 0; i < MAX_CLOSE_DEVICES; i++) {
     combined[MAX_CLOSE_DEVICES+i] = b[i];
   }
-  if (DEBUG) Serial.println("Combined a + b");
   
   sortDevices(combined, deviceSortByAddress, MAX_CLOSE_DEVICES*2);
   
@@ -209,8 +216,6 @@ BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[
       i++;
     }
   }
-  if (DEBUG) Serial.printf("Searched for duplicates. Found %d:\n", deviceCount(duplicates));
-  if (DEBUG) printDeviceList(duplicates, MAX_CLOSE_DEVICES);
   
   // Perform subtraction by storing non-duplicates
   boolean isDuplicate;
@@ -220,7 +225,6 @@ BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[
     for (byte j = 0; j < MAX_CLOSE_DEVICES; j++) {
       if (duplicates[j].getAddress().toString() == nullDevice.getAddress().toString()) continue; // Ignore nullDevices
       if (a[i].getAddress().toString() == duplicates[j].getAddress().toString()) {
-        if (DEBUG) Serial.println("Duplicate found.");
         isDuplicate = true;
       }
     }
@@ -229,7 +233,6 @@ BLEAdvertisedDevice *arrSubtract(BLEAdvertisedDevice a[], BLEAdvertisedDevice b[
       differencesIndex++;
     }
   }
-  if (DEBUG) Serial.println("Performed subtraction");
   
   return differences;
 }
@@ -337,6 +340,12 @@ void readSensors() {
 
 void senseTouchEvents() {
   sortDevices(closeDevices, deviceSortByRSSI, MAX_CLOSE_DEVICES);
+  
+  if (sequence >= UNSIGNED_LONG_MAX - 6) {
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/resetbuttonsequences", String(myMACAddress)});
+    sequence = 1;
+  }
+  
   if (touchSensor1Value < TOUCH_SENSOR_THRESHOLD && !touch1Start) {
     Serial.print("Touch1 start (");
     Serial.print(touchSensor1Value);
@@ -345,7 +354,9 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
-    payload += "\"buttonState\": \"down\"";
+    payload += "\"buttonState\": \"down\",";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
@@ -355,10 +366,13 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
-    payload += "\"buttonState\": \"up\"";
+    payload += "\"buttonState\": \"up\",";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
+  
   if (touchSensor2Value < TOUCH_SENSOR_THRESHOLD && !touch2Start) {
     Serial.print("Touch2 start (");
     Serial.print(touchSensor2Value);
@@ -367,7 +381,9 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
-    payload += "\"buttonState\": \"down\"";
+    payload += "\"buttonState\": \"down\",";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
@@ -377,7 +393,9 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
-    payload += "\"buttonState\": \"up\"";
+    payload += "\"buttonState\": \"up\",";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
@@ -390,7 +408,9 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
-    payload += "\"buttonState\": \"down\"";
+    payload += "\"buttonState\": \"down\",";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
@@ -400,7 +420,9 @@ void senseTouchEvents() {
     String payload = "[{\"exhibitMACAddress\": \"" + String(myMACAddress) + "\", ";
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
-    payload += "\"buttonState\": \"up\"";
+    payload += "\"buttonState\": \"up\", ";
+    payload += "\"sequence\": " + String(sequence);
+    sequence++;
     payload += "}]";
     jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
   }
@@ -416,8 +438,6 @@ void sortDevices(BLEAdvertisedDevice devices[], int8_t (*comparator)(BLEAdvertis
       swapped = false;
       for (byte i = 0; i < arrLen - 1; i++)
       {
-          if (DEBUG) Serial.print("Loop ");
-          if (DEBUG) Serial.println(i);
           if (comparator(devices[i], devices[i+1]) > 0)
           {
               temp = devices[i];
@@ -433,35 +453,17 @@ void sortDevices(BLEAdvertisedDevice devices[], int8_t (*comparator)(BLEAdvertis
 
 int8_t deviceSortByAddress(BLEAdvertisedDevice &a, BLEAdvertisedDevice &b) {
   int8_t result = 0;
-  if (DEBUG) Serial.print("Comparing ");
-  if (DEBUG) Serial.print(a.getAddress().toString().c_str());
-  if (DEBUG) Serial.print(" to ");
-  if (DEBUG) Serial.print(b.getAddress().toString().c_str());
-  if (DEBUG) Serial.print(": ");
   if (b.getAddress().toString() == "00:00:00:00:00:00") result = -1; // Keep empty devices at the end of list.
   else if (a.getAddress().toString() == "00:00:00:00:00:00") result = 1; // Keep empty devices at the end of list.
   else result = strcmp(a.getAddress().toString().c_str(),
                       b.getAddress().toString().c_str());
-  if (DEBUG) Serial.println(result);
   return result;
 }
 
 int8_t deviceSortByRSSI(BLEAdvertisedDevice &a, BLEAdvertisedDevice &b) {
   int8_t result = 0;
-  if (DEBUG) Serial.print("Comparing ");
-  if (DEBUG) Serial.print(a.getAddress().toString().c_str());
-  if (DEBUG) Serial.print(" (");
-  if (DEBUG) Serial.print(a.getRSSI());
-  if (DEBUG) Serial.print(") to ");
-  if (DEBUG) Serial.print(b.getAddress().toString().c_str());
-  if (DEBUG) Serial.print(" (");
-  if (DEBUG) Serial.print(b.getRSSI());
-  if (DEBUG) Serial.print("): ");
-  
   if (a.getRSSI() > b.getRSSI()) result = -1;
   else if (a.getRSSI() < b.getRSSI()) result = 1;
-  
-  if (DEBUG) Serial.println(result);
   return result;
 }
 
@@ -469,7 +471,6 @@ int8_t deviceSortByRSSI(BLEAdvertisedDevice &a, BLEAdvertisedDevice &b) {
 
 void clearDevices(BLEAdvertisedDevice devices[]) {
   for (byte i = 0; i < MAX_CLOSE_DEVICES; i++) {
-    if (DEBUG) Serial.printf("Clearing device %d\n", (int)i);
     devices[i] = nullDevice;
   }
 }
@@ -515,6 +516,7 @@ bool postJSONData(String route, String payload) {
     toSend += "Content-Type: application/json\r\n";
     toSend += "User-Agent: Arduino\r\n";
     toSend += "Accept-Version: ~0\r\n";
+    toSend += "Connection: close\r\n";
     toSend += "Content-Length: "+String(payload.length())+"\r\n";
     toSend += "\r\n";
     toSend += payload;
@@ -536,5 +538,5 @@ void registerExhibit() {
   Serial.println("");
   Serial.printf("My MAC Address: %02x:%02x:%02x:%02x:%02x:%02x\n", address[0], address[1], address[2], address[3], address[4], address[5]);
   sprintf(myMACAddress, "%02x:%02x:%02x:%02x:%02x:%02x", address[0], address[1], address[2], address[3], address[4], address[5]);
-  jsonConnectionQueue.enqueue((jsonPost){"/methods/registerexhibit", "[{\"macAddress\": \"" + String(myMACAddress) +"\"}]"});
+  jsonConnectionQueue.enqueue((jsonPost){"/methods/registerexhibit", "[{\"macAddress\": \"" + String(myMACAddress) +"\", \"buttons\": [{\"state\":\"up\", \"id\":\"1\", \"sequence\": 0}, {\"state\":\"up\", \"id\":\"2\", \"sequence\": 0}, {\"state\":\"up\", \"id\":\"3\", \"sequence\": 0}]}]"});
 }

@@ -1,4 +1,5 @@
 import { Mongo } from 'meteor/mongo';
+import Exhibits from './exhibits.js';
 
 export default TouchEvents = new Mongo.Collection('touchevents');
 
@@ -31,9 +32,26 @@ Meteor.methods({
     check(payload.exhibitMACAddress, String);
     check(payload.deviceString, String);
     check(payload.buttonState, String);
+    check(payload.sequence, Number);
     check(payload.buttonID, Number);
     
-    console.log(extractUUID(payload.deviceString));
+    Exhibits.update({
+      macAddress: payload.exhibitMACAddress,
+      buttons: { 
+        $elemMatch: {
+          id: {$eq: ''+payload.buttonID},
+          sequence: {$lt: payload.sequence},
+        }
+      }
+    },{
+      $set: {
+        "buttons.$.state": payload.buttonState,
+        timestamp: new Date(),
+        "buttons.$.sequence": payload.sequence,
+      }
+    });
+
+    console.log(payload);
 
     TouchEvents.insert({
         exhibitMACAddress: payload.exhibitMACAddress,
@@ -51,7 +69,6 @@ Meteor.methods({
 
 function extractUUID(str) {
   let match;
-  console.log(str);
   if (match = str.match(/manufacturer data: (\w+?)\b/)) {
     return match[1].length > 32 ?  match[1].substring(8,40) : match[1];
   }
