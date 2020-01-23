@@ -4,7 +4,6 @@ import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import ExhibitDevices from '../api/exhibitdevices.js';
 import Exhibits from '../api/exhibits.js';
-// import TouchEvents from '../api/touchevents.js';
 
 class App extends Component {
   constructor(props) {
@@ -70,11 +69,6 @@ class App extends Component {
       return false;
   }
 
-  // whichTouchDown() {
-  //   if (this.props.touchEvent && this.props.touchEvent.buttonState == "down")
-  //     return this.props.touchEvent.buttonID;
-  // }
-  
   isButtonDown(id) {
     let buttonDown = false;
     if (this.props.exhibit && this.props.exhibit.buttons) {
@@ -92,7 +86,6 @@ class App extends Component {
   render() {
     let className = "container";
     this.isClosest() ? className += " iAmClosest" : "";
-    // this.whichTouchDown() ? className += " button" + this.whichTouchDown() + "Down" : "";
     this.isButtonDown("1") ? className += " button1Down" : "";
     this.isButtonDown("2") ? className += " button2Down" : "";
     this.isButtonDown("3") ? className += " button3Down" : "";
@@ -115,13 +108,11 @@ class App extends Component {
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
   Meteor.subscribe('exhibit', '30:ae:a4:58:42:48');
-  // Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null);
   
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
     deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,
     exhibit: Exhibits.findOne(),
-    // touchEvent: TouchEvents.findOne(),
   };
 })(App);
 

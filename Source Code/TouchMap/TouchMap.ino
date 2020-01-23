@@ -8,13 +8,15 @@
 #include <AutoConnect.h>
 WebServer   Server;
 AutoConnect Portal(Server);
-WiFiClient client;
+WiFiClient httpClient;
+WiFiClient touchEventClient;
 
 // TODO:
 // It would be nice if this could be autodiscovered on the local network
 // instead of hardcoded.
-#define touchMapServer        "designcards.mooo.com"
-#define touchMapServerPort    3000
+#define SERVER_HOST        "designcards.mooo.com"
+#define SERVER_HTTP_PORT    3000
+#define SERVER_EVENT_PORT   9000
 
 
 // BLE Stuff ---------
@@ -48,8 +50,8 @@ int touchSensor3Value = 0;
 boolean touch1Start = false;
 boolean touch2Start = false;
 boolean touch3Start = false;
-unsigned long sequence = 1;
 #define UNSIGNED_LONG_MAX 4294967295
+unsigned long sequence = 1;
 
 #include <Queue.h>
 struct jsonPost {
@@ -89,6 +91,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   connectWiFi();
   registerExhibit();
+  connectEventServer();
   setupBLE();
   clearDevices(previousCloseDevices);
   clearDevices(closeDevices);
@@ -101,17 +104,6 @@ void loop() {
   Portal.handleClient();
   readSensors();
   senseTouchEvents();
-  
-  // if there's incoming data from the net connection.
-  // send it out the serial port. This is for debugging
-  // purposes only:
-//  while(client.available()) {
-//    String line = client.readStringUntil('\r');
-//    Serial.print(line);
-//  }
-//  
-//  client.stop();
-  
   handleConnectionQueue();
 }
 
@@ -122,15 +114,14 @@ void handleConnectionQueue() {
   while(jsonConnectionQueue.item_count() > 0) {
     Serial.print("Connection queue item count: ");
     Serial.println(jsonConnectionQueue.item_count());
-    if (!client.connected()) { // Block on connections and handle each one in sequence.
+    if (!httpClient.connected()) { // Block on connections and handle each one in sequence.
       jsonPost postThis = jsonConnectionQueue.dequeue();
       postJSONData(postThis.route, postThis.payload);
-      while (client.available()) {
-        char c = client.read();
+      while (httpClient.available()) {
+        char c = httpClient.read();
         Serial.write(c);
       }
-//      client.flush();
-      client.stop();
+      httpClient.stop();
     }
   }
 }
@@ -342,7 +333,7 @@ void senseTouchEvents() {
   sortDevices(closeDevices, deviceSortByRSSI, MAX_CLOSE_DEVICES);
   
   if (sequence >= UNSIGNED_LONG_MAX - 6) {
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/resetbuttonsequences", String(myMACAddress)});
+    jsonConnectionQueue.enqueue((jsonPost){"/methods/resetbuttonsequences", "[{\"macAddress\": \"" + String(myMACAddress) + "\"}]"});
     sequence = 1;
   }
   
@@ -355,10 +346,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"down\",";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
   else if (touchSensor1Value > TOUCH_SENSOR_THRESHOLD && touch1Start) {
     Serial.println("Touch1 end");
@@ -367,10 +357,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 1, ";
     payload += "\"buttonState\": \"up\",";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
   
   if (touchSensor2Value < TOUCH_SENSOR_THRESHOLD && !touch2Start) {
@@ -382,10 +371,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"down\",";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
   else if (touchSensor2Value > TOUCH_SENSOR_THRESHOLD && touch2Start) {
     Serial.println("Touch2 end");
@@ -394,10 +382,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 2, ";
     payload += "\"buttonState\": \"up\",";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
 
   if (touchSensor3Value < TOUCH_SENSOR_THRESHOLD && !touch3Start) {
@@ -409,10 +396,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"down\",";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
   else if (touchSensor3Value > TOUCH_SENSOR_THRESHOLD && touch3Start) {
     Serial.println("Touch3 end");
@@ -421,10 +407,9 @@ void senseTouchEvents() {
     payload += "\"deviceString\": \"" + String(closeDevices[0].toString().c_str()) + "\",";
     payload += "\"buttonID\": 3, ";
     payload += "\"buttonState\": \"up\", ";
-    payload += "\"sequence\": " + String(sequence);
-    sequence++;
+    payload += "\"sequence\": " + String(sequence++);
     payload += "}]";
-    jsonConnectionQueue.enqueue((jsonPost){"/methods/touchevents.addEvent", payload});
+    sendEventData(payload);
   }
 }
 
@@ -495,23 +480,45 @@ void bleadCopy(BLEAdvertisedDevice arrayOriginal[], BLEAdvertisedDevice arrayCop
   }
 }
 
+
+void connectEventServer() {
+  if (touchEventClient.connect(SERVER_HOST, SERVER_EVENT_PORT) > 0) {
+    Serial.print("Connected to event server.");
+  }
+  else {
+    Serial.print("Failed to connect to event server. ");
+  }
+}
+
+bool sendEventData(String payload) {
+  if (!touchEventClient.connected()) {
+    connectEventServer();
+  }
+  if (DEBUG) Serial.println("sendEventData");
+  if (DEBUG) Serial.println(payload);
+  touchEventClient.print(payload);
+  Serial.println("sent.");
+}
+
+
 bool postJSONData(String route, String payload) {
   if (DEBUG) Serial.println("postJSONData");
   // close any connection before send a new request.
   // This will free the socket on the WiFi shield
-  // client.stop();
+  // httpClient.stop();
   
   // if there's a successful connection:
-  if (client.connect(touchMapServer, touchMapServerPort) > 0) {
-    Serial.print("Connected... ");
+  if (httpClient.connect(SERVER_HOST, SERVER_HTTP_PORT) > 0) {
+    Serial.println("Connected to HTTP server.");
     // send the HTTP POST request:
     
     // Build HTTP request.
-    String toSend = "POST ";
+    String toSend = "";
+    toSend += "POST ";
     toSend += route;
     toSend += " HTTP/1.1\r\n";
     toSend += "Host:";
-    toSend += touchMapServer;
+    toSend += SERVER_HOST;
     toSend += "\r\n" ;
     toSend += "Content-Type: application/json\r\n";
     toSend += "User-Agent: Arduino\r\n";
@@ -521,12 +528,12 @@ bool postJSONData(String route, String payload) {
     toSend += "\r\n";
     toSend += payload;
     if (DEBUG) Serial.println(toSend);
-    client.println(toSend);
-    Serial.println("sent.");
+    httpClient.println(toSend);
+    Serial.println("JSON data sent.");
     return true;
   } else {
     // if you couldn't make a connection:
-    Serial.println("connection failed");
+    Serial.println("Failed to connect to HTTP server.");
     return false;
   }
 }

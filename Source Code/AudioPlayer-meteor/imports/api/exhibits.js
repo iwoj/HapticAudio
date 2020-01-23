@@ -33,13 +33,20 @@ Meteor.methods({
     console.log(Exhibits.findOne({macAddress:payload.macAddress}));
   
   },
-  'resetbuttonsequences' (macAddress) {
+  'resetbuttonsequences' (payload) {
+    check(payload, Object);
+    check(payload.macAddress, String);
     Exhibits.update({
-      macAddress: macAddress,
+      macAddress: payload.macAddress,
+      buttons : {
+        $elemMatch: {
+          sequence: {$gt:0},
+        }
+      },
     },
     {
       $set: {
-        "buttons.$.sequence": 0,
+        "buttons.$[].sequence": 0,
         timestamp: new Date(),
       }
     });
