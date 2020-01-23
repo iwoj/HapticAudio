@@ -25,6 +25,22 @@ body {
   background-color: #4488ff;
 }
 
+.iAmClosest.button1Down.button2Down {
+  background-image: linear-gradient(red, #44ff44);
+}
+
+.iAmClosest.button3Down.button2Down {
+  background-image: linear-gradient(#44ff44, #4488ff);
+}
+
+.iAmClosest.button1Down.button3Down {
+  background-image: linear-gradient(red, #4488ff);
+}
+
+.iAmClosest.button1Down.button2Down.button3Down {
+  background-image: linear-gradient(red, #44ff44, #4488ff);
+}
+
 .container {
   height: 100vh;
   width: 100vw;
