@@ -4,10 +4,14 @@ import net from 'net';
 
 let DEBUG = false;
 
+export default TouchEvents = new Mongo.Collection('touchevents');
+
+var storageWindow = 5 * 60 * 1000; // 5 minutes
 let EVENT_SERVER_PORT = 9000;
 var eventServer;
 
 if (Meteor.isServer) {
+  initPublications();
   initEventServer();
   
   function initEventServer() {
@@ -48,6 +52,29 @@ if (Meteor.isServer) {
       }
     });
   }
+
+  function initPublications() {
+    Meteor.publish('alltouchevents', function () {
+      return TouchEvents.find({});
+    });
+    Meteor.publish('exhibittouchevents', function (id) {
+      return TouchEvents.find({exhibitMACAddress:id});
+    }, {
+      url: "publications/exhibittouchevents/:0",
+      httpMethod: "get"
+    });
+    Meteor.publish('latesttouchevent', function (exhibitMACAddress, deviceUUID, buttonState) {
+      var query = {};
+      if (exhibitMACAddress) query.exhibitMACAddress = exhibitMACAddress;
+      if (deviceUUID) query.deviceUUID = deviceUUID.replace(/-/g,"").toLowerCase();
+      if (buttonState) query.buttonState = buttonState;
+
+      return TouchEvents.find(query,{sort:{timestamp:-1},limit: 1});
+    }, {
+      url: "publications/latesttouchevent/:0",
+      httpMethod: "get"
+    });
+  }
 }
 
 Meteor.methods({
@@ -73,6 +100,18 @@ Meteor.methods({
         timestamp: new Date(),
         "buttons.$.sequence": payload.sequence,
       }
+    });
+
+    TouchEvents.insert({
+      exhibitMACAddress: payload.exhibitMACAddress,
+      deviceUUID: extractUUID(payload.deviceString),
+      timestamp: new Date(),
+      buttonState: payload.buttonState,
+      buttonID: payload.buttonID,
+    });
+
+    TouchEvents.remove({
+      timestamp: { $lt: new Date(Date.now() - storageWindow) }
     });
   }
 });
