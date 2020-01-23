@@ -63,13 +63,13 @@ if (Meteor.isServer) {
       url: "publications/exhibittouchevents/:0",
       httpMethod: "get"
     });
-    Meteor.publish('latesttouchevent', function (exhibitMACAddress, deviceUUID, buttonState) {
+    Meteor.publish('mytouchevents', function (exhibitMACAddress, deviceUUID, buttonState) {
       var query = {};
       if (exhibitMACAddress) query.exhibitMACAddress = exhibitMACAddress;
       if (deviceUUID) query.deviceUUID = deviceUUID.replace(/-/g,"").toLowerCase();
       if (buttonState) query.buttonState = buttonState;
 
-      return TouchEvents.find(query,{sort:{timestamp:-1},limit: 1});
+      return TouchEvents.find(query,{sort:{timestamp:-1},limit: 50});
     }, {
       url: "publications/latesttouchevent/:0",
       httpMethod: "get"

@@ -114,7 +114,7 @@ class App extends Component {
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
   Meteor.subscribe('exhibit', '30:ae:a4:58:42:48');
-  Meteor.subscribe('latesttouchevent', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null, "down");
+  Meteor.subscribe('mytouchevents', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null, "down");
 
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
