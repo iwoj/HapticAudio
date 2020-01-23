@@ -31,9 +31,6 @@ WiFiClient touchEventClient;
 #define MAX_CLOSE_DEVICES     10
 char myMACAddress[25];
 
-// TODO: 
-// - figure out how to quicken the scan time without crashing. 3 seems to be the max.
-// - use a queue?
 byte scanTime = 1; // In seconds.
 BLEScan* pBLEScan;
 bool runningScan = false;
@@ -60,12 +57,9 @@ struct jsonPost {
 };
 DataQueue<jsonPost> jsonConnectionQueue(10);
 
-
 const byte LED_PIN = 5; // Thing's onboard LED
 
-
-
-#define DEBUG     true
+#define DEBUG     false
 
 
 
