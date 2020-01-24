@@ -6,27 +6,54 @@ import ExhibitDevices from '../api/exhibitdevices.js';
 import Exhibits from '../api/exhibits.js';
 import TouchEvents from '../api/touchevents.js';
 
+var beeps;
+var soundIndex = 1;
+
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       hideCompleted: false,
+      audioLoaded: false
     };
   }
   
 
   componentDidMount() {
-  //   AccountsAnonymous.login(() => {
-  //     Meteor.call("globalsettings.registerUser", {uuid: device.uuid, `});
-  //   });
+    //   AccountsAnonymous.login(() => {
+    //     Meteor.call("globalsettings.registerUser", {uuid: device.uuid, `});
+    //   });
+    var self = this;
     TouchEvents.find({}).observeChanges({
       added(id, user) {
-        console.log("Button press. Event ID: "+id);
+        if (self.props.eventSubscription.ready()) {
+          console.log("Button press. Event ID: "+id);
+          // beeps[Math.floor(Math.random()*beeps.length)].play();
+          if (beeps && beeps.length >= soundIndex) beeps[soundIndex].play();
+        }
       }
     });
   }
   
+
+  loadAudio() {
+    beeps = [
+      new Howl({
+        src: ['59806__runey__bleep02.mp3'],
+        volume: 0.25,
+      }),
+      new Howl({
+        src: ['453267__lyd4tuna__getting-hung-up-on-three-beeps.mp3'],
+        volume: 0.25,
+      }),
+      new Howl({
+        src: ['462832__eelke__gopro-beeps-on-off.mp3'],
+        volume: 0.25,
+      }),
+    ];
+    this.setState({audioLoaded:true});
+  }
 
   renderDevices() {
     let devices = this.props.devices;
@@ -97,6 +124,11 @@ class App extends Component {
     this.isButtonDown("3") ? className += " button3Down" : "";
     return (
       <div className={className}>
+        {!this.state.audioLoaded &&
+          <div className="overlay">
+            <button onClick={(e) => this.loadAudio()}>Begin</button>
+          </div>
+        }
         <header>
           <h1>{this.props.deviceCount} Nearby Device{this.props.deviceCount == 1 ? "" : "s"}</h1>
         </header>
@@ -114,13 +146,13 @@ class App extends Component {
 export default withTracker(() => {
   Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
   Meteor.subscribe('exhibit', '30:ae:a4:58:42:48');
-  Meteor.subscribe('mytouchevents', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null, "down");
 
   return {
     devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
     deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,
     exhibit: Exhibits.findOne(),
     touchEvent: TouchEvents.findOne(),
+    eventSubscription: Meteor.subscribe('mytouchevents', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null, "down"),
   };
 })(App);
 

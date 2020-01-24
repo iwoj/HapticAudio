@@ -57,6 +57,7 @@ mongo-id@1.0.7
 npm-mongo@3.3.0
 ordered-dict@1.1.0
 promise@0.11.2
+puresick:howler2@2.0.9
 random@1.1.0
 rate-limit@1.0.9
 react-meteor-data@2.0.1
