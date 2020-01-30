@@ -40,7 +40,7 @@ BLEAdvertisedDevice previousCloseDevices[MAX_CLOSE_DEVICES];
 BLEAdvertisedDevice nullDevice = BLEAdvertisedDevice();
 
 // Capacitive Touch Stuff ---------
-const int TOUCH_SENSOR_THRESHOLD = 80;
+const int TOUCH_SENSOR_THRESHOLD = 70;
 int touchSensor1Value = 0;
 int touchSensor2Value = 0;
 int touchSensor3Value = 0;

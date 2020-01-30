@@ -21,22 +21,17 @@ class App extends Component {
   
 
   componentDidMount() {
-    //   AccountsAnonymous.login(() => {
-    //     Meteor.call("globalsettings.registerUser", {uuid: device.uuid, `});
-    //   });
-    var self = this;
-    TouchEvents.find({}).observeChanges({
-      added(id, user) {
-        if (self.props.eventSubscription.ready()) {
-          console.log("Button press. Event ID: "+id);
-          // beeps[Math.floor(Math.random()*beeps.length)].play();
-          if (beeps && beeps.length >= soundIndex) beeps[soundIndex].play();
-        }
-      }
-    });
+    this.registerUser();
+    this.registerBeepEvents();
   }
   
 
+  registerUser() {
+    AccountsAnonymous.login(() => {
+      if (Meteor.isCordova) Meteor.call("exhibitdevices.registerdevice", {uuid: device.uuid});
+    });
+  }
+  
   loadAudio() {
     beeps = [
       new Howl({
@@ -66,6 +61,7 @@ class App extends Component {
   
   renderDevices() {
     let devices = this.props.devices;
+    if (!devices) return;
     return devices.map((currentDevice, index) => {
       return (
         <li key={currentDevice.address} className={index == 0 ? "closestDevice" : ""}>{currentDevice.uuid ? currentDevice.uuid : currentDevice.address} {currentDevice.signalStrength}</li>
@@ -86,6 +82,7 @@ class App extends Component {
   isClosest() {
     let devices = this.props.devices;
     let closest = false;
+    if (!devices) return;
     devices.forEach((currentDevice, index) => {
       if (index == 0 && Meteor.isCordova && this.uuidMatch(device.uuid, currentDevice.uuid)) {
         closest = true;
@@ -116,6 +113,18 @@ class App extends Component {
     }
   }
   
+  registerBeepEvents() {
+    var self = this;
+    TouchEvents.find({}).observeChanges({
+      added(id, user) {
+        if (self.props.eventSubscription.ready()) {
+          // beeps[Math.floor(Math.random()*beeps.length)].play();
+          if (beeps && beeps.length >= soundIndex) beeps[soundIndex].play();
+        }
+      }
+    });
+  }
+
   render() {
     let className = "container";
     this.isClosest() ? className += " iAmClosest" : "";
@@ -138,18 +147,19 @@ class App extends Component {
         <ul>
           {this.renderButtons()}
         </ul>
+        <div>{Meteor.user() && Meteor.user().profile && Meteor.user().profile.uuid}</div>
       </div>
     );
   }
 }
 
 export default withTracker(() => {
-  Meteor.subscribe('latestexhibitdevices', '30:ae:a4:58:42:48');
+  Meteor.subscribe('latestuserexhibitdevices', '30:ae:a4:58:42:48');
   Meteor.subscribe('exhibit', '30:ae:a4:58:42:48');
 
   return {
-    devices: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
-    deviceCount: ExhibitDevices.find().fetch().length > 0 ? ExhibitDevices.find().fetch()[0].devices.length : 0,
+    devices: ExhibitDevices.find().count() > 0 ? ExhibitDevices.find().fetch()[0].devices : [],
+    deviceCount: ExhibitDevices.find().count() > 0 && ExhibitDevices.find().fetch()[0].devices ? ExhibitDevices.find().fetch()[0].devices.length : 0,
     exhibit: Exhibits.findOne(),
     touchEvent: TouchEvents.findOne(),
     eventSubscription: Meteor.subscribe('mytouchevents', '30:ae:a4:58:42:48', typeof device !== 'undefined'  ? device.uuid : null, "down"),
