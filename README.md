@@ -3,9 +3,7 @@
 Installation
 ------------
 
-To install the TouchMap code on an ESP32 device (such as the Sparkfun ESP32
-Thing), you will need to select the "Large App" partition scheme in the Arduino
-IDE.
+To install the TouchMap code on an ESP32 device with the Arduino IDE, you will need to use the "Large App" partition scheme.
 
 Required Libraries
 - https://github.com/Hieromon/AutoConnect
